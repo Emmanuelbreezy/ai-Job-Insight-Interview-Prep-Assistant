@@ -1,61 +1,46 @@
 "use client";
 import {
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
+import { useQuery } from "convex/react";
 import { FileTextIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 
-type FileItem = {
-  id: string;
-  name: string;
-  type: "file" | "directory";
-  extension?: string;
-};
-
-const FileDirectoryList = () => {
+const FileDirectoryList = (props: { userId: string }) => {
   const pathname = usePathname();
-
-  const items: FileItem[] = [
-    {
-      id: "HzAa5dLH1LHsuqAdUOS0t",
-      name: "Kara_Resume(2).pdf",
-      type: "file",
-      extension: ".pdf",
-    },
-    {
-      id: "HzAa5dLH1LHsuqAdUO399",
-      name: "myNew_Resume.pdf",
-      type: "file",
-      extension: ".pdf",
-    },
-  ];
-
-  console.log(pathname, "pathname");
+  const files = useQuery(api.files.getFilesByUserId, { userId: props.userId });
 
   return (
-    <SidebarGroup>
-      <SidebarMenu className="min-h-[50px] scrollbar overflow-y-auto pb-2">
-        {items.map((item) => {
-          const portfolioUrl = `/portfolio/${item.id}`;
+    <SidebarGroup className="pt-0">
+      <SidebarGroupLabel className="text-white/80 mt-0">
+        Resume
+      </SidebarGroupLabel>
+      <SidebarMenu
+        className="min-h-[350px] max-h-[350px] 
+      scrollbar overflow-y-auto pb-2"
+      >
+        {files?.map((item) => {
+          const filePageUrl = `/file/${item._id}`;
           return (
-            <SidebarMenuItem key={item.id} className="">
+            <SidebarMenuItem key={item._id} className="">
               <SidebarMenuButton
                 className={cn(
-                  `*:
-                  !bg-transparent !text-white hover:!bg-gray-700 
+                  `!bg-transparent !text-white hover:!bg-gray-700 
                 transition-colors
                   `,
-                  portfolioUrl === pathname && "!bg-gray-700"
+                  filePageUrl === pathname && "!bg-gray-700"
                 )}
                 asChild
               >
-                <Link href={portfolioUrl} className="text-white">
+                <Link href={filePageUrl} className="text-white">
                   <FileTextIcon className="w-4 h-4" />
                   <span>{item.name}</span>
                 </Link>

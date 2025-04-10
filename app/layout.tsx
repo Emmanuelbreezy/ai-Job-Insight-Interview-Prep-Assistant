@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Onest } from "next/font/google";
 import "./globals.css";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
+import { ConvexClientProvider } from "@/context/ConvexClientProvider";
 
 const onest = Onest({ subsets: ["latin"] });
 
@@ -16,14 +19,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`w-full bg-white ${onest.className}`}
-        suppressHydrationWarning
-      >
-        {children}
-        <Toaster />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body
+          className={`w-full bg-white ${onest.className}`}
+          suppressHydrationWarning
+        >
+          <ConvexClientProvider>
+            <NuqsAdapter>{children}</NuqsAdapter>
+          </ConvexClientProvider>
+          <Toaster />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

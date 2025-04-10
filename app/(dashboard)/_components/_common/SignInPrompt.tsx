@@ -1,12 +1,19 @@
+"use client";
+import React from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { SidebarGroup } from "@/components/ui/sidebar";
-import Image from "next/image";
-import React from "react";
+import { useSignInModal } from "@/hooks/use-signin-modal";
 
 const SignInPrompt = () => {
+  const { open } = useSignInModal();
+
   return (
     <SidebarGroup>
-      <div className="w-full flex flex-col items-center justify-center shrink-0">
+      <div
+        className="w-full h-[50vh] flex flex-col 
+      items-center justify-center shrink-0"
+      >
         <Image
           src="/signin-prompt.svg"
           alt=""
@@ -20,7 +27,9 @@ const SignInPrompt = () => {
         >
           Sign in for free to save your portfolio history
         </span>
-        <Button className="mt-6">Sign in</Button>
+        <Button onClick={open} className="mt-6">
+          Sign in
+        </Button>
       </div>
     </SidebarGroup>
   );

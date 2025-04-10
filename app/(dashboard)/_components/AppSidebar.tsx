@@ -1,4 +1,7 @@
 "use client";
+import Link from "next/link";
+import { useAuth, useUser } from "@clerk/nextjs";
+import { PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -9,16 +12,17 @@ import {
   SidebarHeader,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { FolderPlusIcon, PlusIcon } from "lucide-react";
-import Link from "next/link";
 import SignInPrompt from "./_common/SignInPrompt";
 import { SidebarFooterContent } from "./_common/SidebarFooterContent";
 import { useUpgradeModal } from "@/hooks/use-upgrade-modal";
-import { UpgradeModal } from "./UpgradeModal";
 import FileDirectoryList from "./FileDirectoryList";
 
 const AppSidebar = () => {
+  const { isSignedIn, user, isLoaded } = useUser();
+  const { signOut } = useAuth();
   const { openModal } = useUpgradeModal();
+
+  const userId = user?.id || null;
 
   return (
     <>
@@ -33,7 +37,7 @@ const AppSidebar = () => {
           <SidebarTrigger className="!text-white !p-0 !bg-gray-800"></SidebarTrigger>
         </SidebarHeader>
         <SidebarContent className="overflow-hidden">
-          <SidebarGroup className="mb-3">
+          <SidebarGroup>
             <SidebarGroupContent>
               <Link href="/">
                 <Button
@@ -46,29 +50,22 @@ const AppSidebar = () => {
                   <span>New Portfoilo</span>
                 </Button>
               </Link>
-              <Button
-                className="w-full !bg-transparent !text-white border
-                border-[rgba(255,255,255,0.2)] mt-3 !h-10 !rounded-lg 
-                !font-medium text-sm hover:!bg-gray-700 transition-colors"
-                variant="outline"
-              >
-                <FolderPlusIcon className="w-4 h-4" />
-                <span>New Folder</span>
-              </Button>
             </SidebarGroupContent>
           </SidebarGroup>
 
           {/* {File DirectoryList} */}
-          <FileDirectoryList />
+          {userId && <FileDirectoryList {...{ userId }} />}
 
           {/* {SignIn Prompt} */}
-          <SignInPrompt />
+          {!isSignedIn && <SignInPrompt />}
         </SidebarContent>
         <SidebarFooter>
           <SidebarFooterContent
-            userName="John Doe"
-            emailAddress="johndoe@gmail.com"
-            userInitial="J"
+            isSignedIn={isSignedIn || false}
+            isLoaded={isLoaded}
+            userName={user?.fullName!}
+            emailAddress={user?.primaryEmailAddress?.emailAddress!}
+            userInitial={user?.firstName?.charAt(0) || ""}
             userPlan="FREE"
             userUsage={{
               portfoliosGenerated: 3,
@@ -79,7 +76,11 @@ const AppSidebar = () => {
               },
             }}
             onUpgradeClick={() => openModal()}
-            onSignOut={() => console.log("Log out")}
+            onSignOut={() =>
+              signOut({
+                redirectUrl: "/",
+              })
+            }
           />
         </SidebarFooter>
       </Sidebar>

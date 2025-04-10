@@ -1,26 +1,14 @@
 "use client";
-import { useState } from "react";
+import { parseAsBoolean, useQueryState } from "nuqs";
 
 export const useUpgradeModal = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useQueryState(
+    "upgrade",
+    parseAsBoolean.withDefault(false)
+  );
 
-  // const openModal = () => setIsOpen(true);
-  // const closeModal = () => setIsOpen(false);
+  const openModal = () => setIsOpen(true);
+  const closeModal = () => setIsOpen(false);
 
-  const openModal = () => {
-    console.log("Opening modal"); // Debug log
-    setIsOpen(true);
-  };
-
-  const closeModal = () => {
-    console.log("Closing modal"); // Debug log
-    setIsOpen(false);
-  };
-
-  return {
-    isOpen,
-    openModal,
-    closeModal,
-    setIsOpen,
-  };
+  return { isOpen, openModal, closeModal };
 };

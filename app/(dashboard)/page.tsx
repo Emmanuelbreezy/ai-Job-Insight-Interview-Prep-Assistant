@@ -1,6 +1,11 @@
+"use client";
+import FileUploader from "@/components/FileUploader";
 import AppHighlights from "./_components/_common/AppHighlights";
+import { useUser } from "@clerk/nextjs";
 
 export default function Home() {
+  const { isSignedIn, user } = useUser();
+
   return (
     <div
       className="w-full flex-1 min-h-screen flex flex-col items-center
@@ -49,6 +54,14 @@ export default function Home() {
             <br />
             your resume into a stunning portfolio with AI.
           </p>
+        </div>
+
+        <div className="file--dropzone">
+          <FileUploader
+            isSubscribed={false}
+            userId={user?.id || null}
+            isSignedIn={isSignedIn || false}
+          />
         </div>
       </div>
     </div>

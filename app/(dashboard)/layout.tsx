@@ -1,6 +1,8 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "./_components/AppSidebar";
 import { UpgradeModal } from "./_components/UpgradeModal";
+import { SignInModal } from "@/components/SigninModal";
+import { AppProvider } from "@/context/AppProvider";
 
 export default async function DashboardLayout({
   children,
@@ -8,8 +10,7 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
-      <UpgradeModal />
+    <AppProvider>
       <SidebarProvider
         className="h-[min(100dvh, 100vh)] w-[100vw] "
         style={
@@ -21,6 +22,9 @@ export default async function DashboardLayout({
         <AppSidebar />
         <main className="w-full flex-1">{children}</main>
       </SidebarProvider>
-    </>
+
+      <UpgradeModal />
+      <SignInModal />
+    </AppProvider>
   );
 }
