@@ -13,8 +13,10 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
-import type * as fileStorage from "../fileStorage.js";
-import type * as files from "../files.js";
+import type * as actions from "../actions.js";
+import type * as interview from "../interview.js";
+import type * as job from "../job.js";
+import type * as jobInsightConversation from "../jobInsightConversation.js";
 import type * as messages from "../messages.js";
 
 /**
@@ -26,8 +28,10 @@ import type * as messages from "../messages.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
-  fileStorage: typeof fileStorage;
-  files: typeof files;
+  actions: typeof actions;
+  interview: typeof interview;
+  job: typeof job;
+  jobInsightConversation: typeof jobInsightConversation;
   messages: typeof messages;
 }>;
 export declare const api: FilterApi<

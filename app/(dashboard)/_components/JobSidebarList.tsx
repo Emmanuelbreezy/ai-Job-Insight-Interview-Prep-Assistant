@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -9,26 +10,39 @@ import {
 import { api } from "@/convex/_generated/api";
 import { cn } from "@/lib/utils";
 import { useQuery } from "convex/react";
-import { FileTextIcon } from "lucide-react";
+import { MessageSquareTextIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const FileDirectoryList = (props: { userId: string }) => {
+const JobSidebarList = (props: { userId: string }) => {
   const pathname = usePathname();
-  const files = useQuery(api.files.getFilesByUserId, { userId: props.userId });
+  const jobs = useQuery(api.job.getAllJobs, {
+    userId: props.userId,
+  });
+
+  if (jobs === undefined) {
+    return (
+      <div className="w-full flex flex-col gap-3 px-2">
+        <Skeleton className="h-[20px] w-full bg-gray-600" />
+        <Skeleton className="h-[20px] w-full bg-gray-600" />
+        <Skeleton className="h-[20px] w-full bg-gray-600" />
+      </div>
+    );
+  }
+  if (jobs?.length === 0) return null;
 
   return (
     <SidebarGroup className="pt-0">
       <SidebarGroupLabel className="text-white/80 mt-0">
-        Resume
+        Job List
       </SidebarGroupLabel>
       <SidebarMenu
         className="min-h-[350px] max-h-[350px] 
       scrollbar overflow-y-auto pb-2"
       >
-        {files?.map((item) => {
-          const filePageUrl = `/file/${item._id}`;
+        {jobs?.map((item: any) => {
+          const interviewPageUrl = `/job/${item._id}`;
           return (
             <SidebarMenuItem key={item._id} className="">
               <SidebarMenuButton
@@ -36,13 +50,13 @@ const FileDirectoryList = (props: { userId: string }) => {
                   `!bg-transparent !text-white hover:!bg-gray-700 
                 transition-colors
                   `,
-                  filePageUrl === pathname && "!bg-gray-700"
+                  interviewPageUrl === pathname && "!bg-gray-700"
                 )}
                 asChild
               >
-                <Link href={filePageUrl} className="text-white">
-                  <FileTextIcon className="w-4 h-4" />
-                  <span>{item.name}</span>
+                <Link href={interviewPageUrl} className="text-white">
+                  <MessageSquareTextIcon className="w-4 h-4" />
+                  <span>{item.jobTitle}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -53,4 +67,4 @@ const FileDirectoryList = (props: { userId: string }) => {
   );
 };
 
-export default FileDirectoryList;
+export default JobSidebarList;

@@ -1,17 +1,13 @@
-"use client";
-import FileUploader from "@/components/FileUploader";
 import AppHighlights from "./_components/_common/AppHighlights";
-import { useUser } from "@clerk/nextjs";
+import JobInfoForm from "./_components/JobInfoForm";
 
 export default function Home() {
-  const { isSignedIn, user } = useUser();
-
   return (
     <div
       className="w-full flex-1 min-h-screen flex flex-col items-center
        bg-gradient-to-br from-purple-500/5 to-primary/5 "
     >
-      <div className="space-y-6">
+      <div className="space-y-3">
         <AppHighlights />
 
         <div className="text-center">
@@ -19,14 +15,15 @@ export default function Home() {
             className="text-[56px] font-bold bg-gradient-to-r from-primary
            to-purple-600 bg-clip-text text-[#070D1B] tracking-[-0.8px]"
           >
-            Turn Resume to
+            AI-Chat Interview
             <span className="relative inline-block pl-5">
               <div
-                className="absolute -right-2.5 top-2 w-[245px] h-16 bg-primary
+                className="absolute -right-2.5 top-2 w-[145px] h-16 bg-primary
                  rotate-2 rounded-lg z-10"
               />
-              <span className="relative text-white z-20">Portfolio</span>
+              <span className="relative text-white z-20">Prep</span>
             </span>
+            <span className="block -mt-5">and Job Insights</span>
           </h1>
           <p className="text-lg text-gray-600 m-[10px_auto]">
             Join millions of{" "}
@@ -50,19 +47,15 @@ export default function Home() {
                 />
               </svg>
             </span>{" "}
-            to instantly transform
+            to instantly
             <br />
-            your resume into a stunning portfolio with AI.
+            get job Insights and prepare for interviews with AI-powered tools.
           </p>
         </div>
 
-        <div className="file--dropzone">
-          <FileUploader
-            isSubscribed={false}
-            userId={user?.id || null}
-            isSignedIn={isSignedIn || false}
-          />
-        </div>
+        <JobInfoForm />
+
+        <br />
       </div>
     </div>
   );

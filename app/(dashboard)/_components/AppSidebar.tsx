@@ -15,7 +15,7 @@ import {
 import SignInPrompt from "./_common/SignInPrompt";
 import { SidebarFooterContent } from "./_common/SidebarFooterContent";
 import { useUpgradeModal } from "@/hooks/use-upgrade-modal";
-import FileDirectoryList from "./FileDirectoryList";
+import JobSidebarList from "./JobSidebarList";
 
 const AppSidebar = () => {
   const { isSignedIn, user, isLoaded } = useUser();
@@ -32,7 +32,7 @@ const AppSidebar = () => {
       m-[4px_0px_0px]"
         >
           <Link href="/" className="text-white text-xl">
-            Resume2<b className="text-primary">Portfolio</b>
+            Interview<b className="text-primary">Assistant</b>.ai
           </Link>
           <SidebarTrigger className="!text-white !p-0 !bg-gray-800"></SidebarTrigger>
         </SidebarHeader>
@@ -47,14 +47,14 @@ const AppSidebar = () => {
                   variant="outline"
                 >
                   <PlusIcon className="w-4 h-4" />
-                  <span>New Portfoilo</span>
+                  <span>New Job</span>
                 </Button>
               </Link>
             </SidebarGroupContent>
           </SidebarGroup>
 
           {/* {File DirectoryList} */}
-          {userId && <FileDirectoryList {...{ userId }} />}
+          {userId && <JobSidebarList {...{ userId }} />}
 
           {/* {SignIn Prompt} */}
           {!isSignedIn && <SignInPrompt />}

@@ -1,6 +1,6 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "./_components/AppSidebar";
-import { UpgradeModal } from "./_components/UpgradeModal";
+import { UpgradeModal } from "../../components/UpgradeModal";
 import { SignInModal } from "@/components/SigninModal";
 import { AppProvider } from "@/context/AppProvider";
 
@@ -15,7 +15,7 @@ export default async function DashboardLayout({
         className="h-[min(100dvh, 100vh)] w-[100vw] "
         style={
           {
-            "--sidebar-width": "307px",
+            "--sidebar-width": "280px",
           } as React.CSSProperties
         }
       >

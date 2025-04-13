@@ -4,18 +4,17 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import PortfolioPreview from "../../_components/PortfolioPreview";
-import ChatRenderer from "../../_components/ChatRenderer";
+import ChatRenderer from "../../job/_components/ChatView";
 import { Id } from "@/convex/_generated/dataModel";
 
 interface PageProps {
   params: {
-    fileId: Id<"files">;
+    interviewId: Id<"interview">;
   };
 }
 
 const Page = async ({ params }: PageProps) => {
-  const { fileId } = await params;
+  const { interviewId } = await params;
 
   return (
     <div
@@ -24,40 +23,26 @@ const Page = async ({ params }: PageProps) => {
     overflow-hidden"
     >
       <div className="mx-auto w-full max-w-8xl grow lg:flex">
-        {/* Left sidebar & main wrapper */}
-        {/* <PortfolioPreview isSubscribed={plan.isSubscribed} fileId={file.id} /> */}
-        {/* <div className="flex-1 xl:flex px-2 py-2">
-          <PortfolioPreview />
-        </div> */}
-
-        {/* <div className="shrink-1 flex-[0.65] border-t border-gray-200 lg:w-96 lg:border-l lg:border-t-0">
-          <PdfRenderer url="/EmmanuelUResume.pdf" />
-        </div> */}
-
         <ResizablePanelGroup direction="horizontal" className="w-full h-full">
-          {/* Right Panel (PDF Renderer) */}
+          {/* Right Panel*/}
           <ResizablePanel
-            defaultSize={30}
+            defaultSize={60}
             className=""
             collapsible
             collapsedSize={0}
           >
-            {/* <PdfRenderer url="/EmmanuelUResume.pdf" /> */}
-            <ChatRenderer fileId={fileId} />
+            <ChatRenderer interviewId={interviewId} />
           </ResizablePanel>
 
           {/* Resizable Handle */}
           <ResizableHandle withHandle />
 
-          {/* Left Panel (Portfolio Preview) */}
           <ResizablePanel
-            defaultSize={70}
+            defaultSize={40}
             className="pt-2 border-l border-gray-200"
             collapsible
             collapsedSize={0}
-          >
-            <PortfolioPreview />
-          </ResizablePanel>
+          ></ResizablePanel>
         </ResizablePanelGroup>
       </div>
     </div>

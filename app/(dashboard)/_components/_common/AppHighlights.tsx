@@ -3,7 +3,7 @@ import React from "react";
 
 const AppHighlights = () => {
   return (
-    <div className="flex items-center justify-center gap-7 m-[40px_auto_0] mb-[47px]">
+    <div className="flex items-center justify-center gap-7 m-[40px_auto_0] mb-[30px]">
       {/* First Achievement */}
       <div className="flex flex-col items-center justify-center">
         <div className="flex items-center">
