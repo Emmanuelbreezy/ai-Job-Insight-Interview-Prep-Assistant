@@ -30,7 +30,7 @@ const Page = async ({ params }: PageProps) => {
         <ResizablePanelGroup direction="horizontal" className="w-full h-full">
           {/* Right Panel*/}
           <ResizablePanel
-            defaultSize={60}
+            defaultSize={55}
             className=""
             collapsible
             collapsedSize={0}
@@ -42,7 +42,7 @@ const Page = async ({ params }: PageProps) => {
           <ResizableHandle withHandle />
 
           <ResizablePanel
-            defaultSize={40}
+            defaultSize={45}
             className="pt-2 border-l border-gray-200"
             collapsible
             collapsedSize={0}

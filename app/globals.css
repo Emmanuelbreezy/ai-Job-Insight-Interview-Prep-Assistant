@@ -16,67 +16,23 @@ body {
   background-color: rgb(33, 33, 33) !important;
 }
 
-.spinner {
-  position: relative;
-  width: 22px;
-  height: 22px;
-  animation: spinner-rotate 1.2s linear infinite;
-}
-
-.spinner .dot {
-  position: absolute;
-  width: 7px;
-  height: 7px;
-  background-color: #a026ff;
+/* blinking Loader color */
+.loader {
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: #6b7280;
   border-radius: 50%;
-}
-
-.spinner .dot1 {
-  top: 0;
-  left: 50%;
-  transform: translate(-50%);
-  opacity: 1;
-}
-
-.spinner .dot2 {
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  opacity: 0.75;
-}
-
-.spinner .dot3 {
-  bottom: 0;
-  left: 50%;
-  transform: translate(-50%);
-  opacity: 0.5;
-}
-
-.spinner .dot4 {
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  opacity: 0.25;
-}
-
-.streaming::after {
-  content: "...";
-  animation: blink 1s infinite;
+  margin-left: 3px;
+  animation: blink 1s infinite ease-in-out;
 }
 
 @keyframes blink {
   0%,
   100% {
-    opacity: 1;
+    opacity: 1; /* Fully visible */
   }
   50% {
-    opacity: 0;
-  }
-}
-
-@keyframes spinner-rotate {
-  to {
-    transform: rotate(1turn);
+    opacity: 0; /* Fully hidden */
   }
 }
 

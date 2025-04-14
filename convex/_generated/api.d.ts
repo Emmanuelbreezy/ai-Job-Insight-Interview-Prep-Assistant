@@ -15,6 +15,7 @@ import type {
 } from "convex/server";
 import type * as actions from "../actions.js";
 import type * as interview from "../interview.js";
+import type * as interviewSession from "../interviewSession.js";
 import type * as job from "../job.js";
 import type * as jobInsightConversation from "../jobInsightConversation.js";
 import type * as messages from "../messages.js";
@@ -30,6 +31,7 @@ import type * as messages from "../messages.js";
 declare const fullApi: ApiFromModules<{
   actions: typeof actions;
   interview: typeof interview;
+  interviewSession: typeof interviewSession;
   job: typeof job;
   jobInsightConversation: typeof jobInsightConversation;
   messages: typeof messages;

@@ -19,7 +19,7 @@ const JobDetails = ({ jobId }: { jobId: Id<"jobs"> }) => {
 
   return (
     <div className="space-y-4 px-4 pb-5">
-      <div className="w-full shadow-lg border-gray-500 rounded-lg p-3 pt-4">
+      <div className="w-full border-gray-500 rounded-lg p-3">
         <h2 className="text-xl font-semibold mb-1">{job.jobTitle}</h2>
         <div className="prose !text-[15px]">
           <div

@@ -1,10 +1,8 @@
 import { ConvexError, v } from "convex/values";
-import { internalAction, mutation, query } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { JobInsightStatus, Role } from "@/lib/constant";
-import { api, internal } from "./_generated/api";
+import { internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
-import { chatSession } from "@/lib/gemini-ai";
-import { getJobInsightConversationPrompt } from "@/lib/prompt";
 
 export const create = mutation({
   args: {
@@ -104,7 +102,7 @@ export const sendUserMessage = mutation({
     // Schedule AI response after 1 second
     await ctx.scheduler.runAfter(
       0,
-      internal.jobInsightConversation.generateAIResponse,
+      internal.actions.generateAIJobInsightResponse,
       {
         conversationId,
         jobId: args.jobId,
@@ -115,68 +113,6 @@ export const sendUserMessage = mutation({
     );
 
     return conversationId;
-  },
-});
-
-export const generateAIResponse = internalAction({
-  args: {
-    conversationId: v.id("jobInsightConversations"),
-    jobId: v.id("jobs"),
-    userId: v.string(),
-    userMessage: v.string(),
-    job: v.any(),
-  },
-  handler: async (ctx, args) => {
-    const jobData = {
-      jobTitle: args.job.jobTitle,
-      processedDescription: args.job.processedDescription,
-    };
-    const [history, responseId] = await Promise.all([
-      ctx.runMutation(api.jobInsightConversation.getConversationHistory, {
-        jobId: args.jobId,
-        limit: 3,
-      }),
-      ctx.runMutation(api.jobInsightConversation.create, {
-        userId: args.userId,
-        jobId: args.jobId,
-        text: " ...",
-        role: Role.AI,
-        status: JobInsightStatus.PENDING,
-      }),
-    ]);
-
-    const prompt = getJobInsightConversationPrompt(
-      jobData.jobTitle || "",
-      jobData.processedDescription || "",
-      args.userMessage,
-      history.map((item) => ({
-        text: item.text,
-        role: item.role,
-        createdAt: item.createdAt,
-      }))
-    );
-
-    const stream = await chatSession.sendMessageStream({ message: prompt });
-    let fullResponse = "";
-    let lastUpdateTime = Date.now();
-    for await (const chunk of stream) {
-      fullResponse += chunk.text;
-
-      // Only update every 500ms or when there's a sentence break
-      const currentTime = Date.now();
-      if (currentTime - lastUpdateTime > 5 || chunk?.text?.includes(".")) {
-        await ctx.runMutation(api.jobInsightConversation.update, {
-          id: responseId,
-          text: fullResponse + " ...",
-        });
-        lastUpdateTime = currentTime;
-      }
-    }
-    await ctx.runMutation(api.jobInsightConversation.update, {
-      id: responseId,
-      text: fullResponse,
-      status: JobInsightStatus.COMPLETED,
-    });
   },
 });
 

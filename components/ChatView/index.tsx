@@ -2,12 +2,14 @@
 import React from "react";
 import ChatInput from "./chat-input";
 import ChatMessages from "./chat-messages";
-import { useAppContext } from "@/context/AppProvider";
 import { Id } from "@/convex/_generated/dataModel";
 
-const ChatComponent = (props: { jobId: Id<"jobs">; userId: string | null }) => {
-  const { jobId, userId } = props;
-  const { isGenerating } = useAppContext();
+const ChatComponent = (props: {
+  jobId: Id<"jobs">;
+  userId: string | null;
+  userName: string | null;
+}) => {
+  const { jobId, userId, userName } = props;
 
   return (
     <div
@@ -19,7 +21,7 @@ const ChatComponent = (props: { jobId: Id<"jobs">; userId: string | null }) => {
         className="flex-1 justify-between 
         flex flex-col"
       >
-        <ChatMessages jobId={jobId} responseLoading={false} />
+        <ChatMessages jobId={jobId} userId={userId} userName={userName} />
       </div>
       <ChatInput jobId={jobId} userId={userId} isDisabled={false} />
     </div>

@@ -88,7 +88,7 @@ const ChatInput = ({ jobId, userId, isDisabled }: ChatInputProps) => {
       >
         <div
           className="relative flex h-full flex-1 items-stretch 
-        md:flex-col px-4 pt-4 -mb-3"
+        md:flex-col px-4 pt-3 -mb-3"
         >
           <div
             className="relative flex flex-col w-full flex-grow

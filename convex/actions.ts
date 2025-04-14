@@ -5,6 +5,7 @@ import { chatSession, genAI } from "@/lib/gemini-ai";
 import { processAndCleanJobDescription } from "@/lib/job-processor";
 import {
   getInterviewQuestionPrompt,
+  getJobInsightConversationPrompt,
   getJobTitleDescPrompt,
 } from "@/lib/prompt";
 import { api, internal } from "./_generated/api";
@@ -16,7 +17,7 @@ import {
   QuestionType,
   Role,
 } from "@/lib/constant";
-import { storeInVectorDB } from "@/lib/pinecone-vectordb";
+import { getContext, storeInVectorDB } from "@/lib/pinecone-vectordb";
 //import { generateDefaultTitle } from "@/lib/helper";
 
 export const processJobWithAI = internalAction({
@@ -62,8 +63,8 @@ export const processJobWithAI = internalAction({
       status: JobStatus.READY,
     });
 
-    // Store the processed description in the vector database
-    await storeInVectorDB([
+    // // Store the processed description in the vector database
+    await storeInVectorDB(args.jobId, [
       {
         content: `${title}: ${processedDesc}`,
         metadata: {
@@ -105,55 +106,66 @@ const welcomeMessage = (title: string) => `
   <p>What would you like to focus on first?</p>
 `;
 
-export const processWithAI = internalAction({
+export const generateAIJobInsightResponse = internalAction({
   args: {
+    conversationId: v.id("jobInsightConversations"),
+    jobId: v.id("jobs"),
     userId: v.string(),
-    interviewId: v.id("interview"),
-    jobDescription: v.string(),
+    userMessage: v.string(),
+    job: v.any(),
   },
   handler: async (ctx, args) => {
-    // const title = generateDefaultTitle(args.jobDescription);
-    // console.log(title, "generateDefaultTitle");
-    // console.log("--------------------------------");
-    const processedDesc = await processAndCleanJobDescription(
-      args.jobDescription
+    const jobData = {
+      jobTitle: args.job.jobTitle,
+      processedDescription: args.job.processedDescription,
+    };
+    const [history, responseId] = await Promise.all([
+      ctx.runMutation(api.jobInsightConversation.getConversationHistory, {
+        jobId: args.jobId,
+        limit: 6,
+      }),
+      ctx.runMutation(api.jobInsightConversation.create, {
+        userId: args.userId,
+        jobId: args.jobId,
+        text: "...",
+        role: Role.AI,
+        status: JobInsightStatus.PENDING,
+      }),
+    ]);
+
+    // Step 2: Retrieve context based on the user's message
+
+    const prompt = getJobInsightConversationPrompt(
+      jobData.jobTitle || "",
+      jobData.processedDescription || "",
+      args.userMessage,
+      history.map((item) => ({
+        content: item.text,
+        role: item.role === Role.USER ? "user" : "model",
+        timestamp: new Date(item.createdAt).toISOString(),
+      }))
     );
-    const prompt = "";
-    const response = await genAI.models.generateContent({
-      model: "gemini-2.0-flash",
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      config: {
-        maxOutputTokens: 2000,
-        temperature: 0.3,
-      },
-    });
-    const jobTitle = response.text;
 
-    await ctx.runMutation(api.interview.updateInterview, {
-      interviewId: args.interviewId,
-      jobTitle: jobTitle,
-      processedJobDescription: processedDesc,
-      status: InterviewStatus.READY,
-    });
+    const stream = await chatSession.sendMessageStream({ message: prompt });
+    let fullResponse = "";
+    let lastUpdateTime = Date.now();
+    for await (const chunk of stream) {
+      fullResponse += chunk.text;
 
-    // 4. Send welcome message
-    await ctx.runMutation(api.messages.createMessage, {
-      interviewId: args.interviewId,
-      userId: args.userId,
-      text: `Welcome to your ${jobTitle} interview! I'll ask you 10 questions. 
-      first question coming up`,
-      role: Role.AI,
-      questionType: QuestionType.TEXT,
-      messageType: MessageType.CHAT,
-    });
-
-    // 5. Immediately generate first question
-    await ctx.scheduler.runAfter(100, internal.actions.askQuestion, {
-      interviewId: args.interviewId,
-      userId: args.userId,
-      processedDescription: processedDesc,
-      lastQuestion: undefined, // No previous questions
-      questionNumber: 1,
+      // Only update every 500ms or when there's a sentence break
+      const currentTime = Date.now();
+      if (currentTime - lastUpdateTime > 5 || chunk?.text?.includes(".")) {
+        await ctx.runMutation(api.jobInsightConversation.update, {
+          id: responseId,
+          text: fullResponse + " ...",
+        });
+        lastUpdateTime = currentTime;
+      }
+    }
+    await ctx.runMutation(api.jobInsightConversation.update, {
+      id: responseId,
+      text: fullResponse,
+      status: JobInsightStatus.COMPLETED,
     });
   },
 });

@@ -4,22 +4,30 @@ import { cn } from "@/lib/utils";
 import { useAppContext } from "@/context/AppProvider";
 import { AppMode, Role } from "@/lib/constant";
 import { Id } from "@/convex/_generated/dataModel";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import useScrollToBottom from "@/hooks/use-scroll-bottom";
+import { Avatar, AvatarFallback } from "../ui/avatar";
 
 const ChatMessages = (props: {
   jobId: Id<"jobs">;
-  responseLoading: boolean;
+  userId: string | null;
+  userName: string | null;
 }) => {
-  const { jobId, responseLoading } = props;
+  const { jobId, userId, userName } = props;
   const { setMessages, jobMode } = useAppContext();
   const [isLoading, setIsLoading] = useState(false);
+  const [isStartingSession, setIsStartingSession] = useState(false);
 
   const data = useQuery(api.job.getByJobId, {
     jobId,
     jobMode: jobMode || AppMode.JOB_INSIGHT,
   });
+
+  const createInterviewSession = useMutation(
+    api.interviewSession.createInterviewSession
+  );
+
   const containerEndRef = useScrollToBottom([data, isLoading]);
 
   useEffect(() => {
@@ -39,6 +47,20 @@ const ChatMessages = (props: {
     if (!data || !data.success) return [];
     return data.data || [];
   }, [data]);
+
+  const startInterviewSession = async () => {
+    if (!userId) return;
+    setIsStartingSession(true);
+    try {
+      await createInterviewSession({
+        userId: userId,
+        jobId: jobId,
+      });
+    } catch (error) {
+    } finally {
+      setIsStartingSession(false);
+    }
+  };
 
   return (
     <>
@@ -65,27 +87,30 @@ const ChatMessages = (props: {
                 >
                   <div
                     className={cn(
-                      `flex flex-col space-y-2 
-                  text-base max-w-4xl mx-2`,
+                      `flex flex-col space-y-2 text-base max-w-lg mx-2`,
                       {
                         "order-1 items-end": isUserMessage,
-                        "order-2 items-start": !isUserMessage,
+                        "order-2 items-start !max-w-4xl": !isUserMessage,
                       }
                     )}
                   >
-                    <div className="flex items-end gap-2">
+                    <div
+                      className={cn("flex gap-2", {
+                        "items-end": isUserMessage,
+                        "items-start": !isUserMessage,
+                      })}
+                    >
                       {/* AI Avatar */}
                       {!isUserMessage && (
-                        <div
-                          className="w-8 h-8 shrink-0 rounded-full
-                     bg-gray-200 flex items-center justify-center"
-                        >
-                          <span className="text-gray-900 text-sm">AI</span>
-                        </div>
+                        <Avatar className="w-8 h-8">
+                          <AvatarFallback className="shrink-0 bg-gray-200 text-sm">
+                            AI
+                          </AvatarFallback>
+                        </Avatar>
                       )}
                       <div
                         className={cn("px-4 py-2 rounded-lg inline-block", {
-                          "bg-black/90 text-white": isUserMessage,
+                          "bg-black/80 text-white": isUserMessage,
                           "bg-gray-50 text-gray-900": !isUserMessage,
                         })}
                       >
@@ -95,67 +120,33 @@ const ChatMessages = (props: {
                         />
                       </div>
                       {isUserMessage && (
-                        <div className="w-8 h-8 shrink-0 rounded-full bg-black flex items-center justify-center">
-                          <span className="text-white text-sm">U</span>
-                        </div>
+                        <Avatar className="w-8 h-8">
+                          <AvatarFallback className="shrink-0  bg-black/80 text-white text-sm">
+                            {userName?.charAt(0) || "U"}
+                          </AvatarFallback>
+                        </Avatar>
                       )}
                     </div>
                   </div>
                 </div>
               );
             })}
-
-            {responseLoading && (
-              <div className="flex items-end">
-                <div
-                  className="flex flex-col space-y-2 text-sm max-w-xs mx-2
-               order-2 items-start"
-                >
-                  <div className="flex items-end gap-2">
-                    <div
-                      className="w-8 h-8 shrink-0 rounded-full
-                     bg-gray-200 flex items-center justify-center"
-                    >
-                      <span className="text-gray-900 text-sm">AI</span>
-                    </div>
-                    <div
-                      className="px-4 py-2 rounded-lg inline-block
-                   bg-gray-100 text-gray-900"
-                    >
-                      <div className="flex space-x-1">
-                        <div
-                          className="h-2 w-2 bg-gray-500 rounded-full
-                       animate-bounce delay-100"
-                        />
-                        <div
-                          className="h-2 w-2 bg-gray-500 rounded-full 
-                      animate-bounce delay-200"
-                        />
-                        <div
-                          className="h-2 w-2 bg-gray-500 rounded-full
-                       animate-bounce delay-300"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </>
-        ) : (
+        ) : jobMode === AppMode.JOB_INSIGHT ? (
           <div className="flex-1 flex flex-col items-center justify-center gap-2">
             <MessageSquareTextIcon className="h-8 w-8" />
             <h3 className="font-semibold text-lg">
-              {jobMode === AppMode.JOB_INSIGHT
-                ? "Your Job Insight Assistant is Ready!"
-                : "Your Interview Coach is Ready!"}
+              Your Job Insight Assistant is Ready!
             </h3>
             <p className="text-zinc-500 text-sm">
-              {jobMode === AppMode.JOB_INSIGHT
-                ? "Get tailored advice and insights to ace your job search."
-                : "Practice and refine your skills for a successful interview."}
+              Get tailored advice and insights to ace your job search.
             </p>
           </div>
+        ) : (
+          <InterviewSessionWel
+            isStartingSession={isStartingSession}
+            onStartSession={startInterviewSession}
+          />
         )}
         <br />
         <br />
@@ -166,4 +157,31 @@ const ChatMessages = (props: {
   );
 };
 
+const InterviewSessionWel = ({
+  isStartingSession,
+  onStartSession,
+}: {
+  isStartingSession: boolean;
+  onStartSession: () => void;
+}) => {
+  return (
+    <div className="text-center">
+      <MessageSquareTextIcon className="h-8 w-8 mx-auto" />
+      <h3 className="font-semibold text-lg mt-2">
+        Your Interview Coach is Ready!
+      </h3>
+      <p className="text-gray-500 text-sm mt-1">
+        Practice and refine your skills for the position.
+      </p>
+      <button
+        onClick={onStartSession}
+        className="mt-4 px-6 py-2 bg-black text-white rounded-lg
+         hover:bg-black/80 transition-colors"
+      >
+        {isStartingSession && <Loader className="w-4 h-4 animate-spin" />}
+        Start Interview Session
+      </button>
+    </div>
+  );
+};
 export default ChatMessages;
