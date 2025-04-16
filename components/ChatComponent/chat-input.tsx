@@ -1,36 +1,38 @@
 "use client";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
-import {
-  Binoculars,
-  Lightbulb,
-  Loader,
-  MessageSquare,
-  Send,
-} from "lucide-react";
+import { Lightbulb, Loader, MessageSquare, Send } from "lucide-react";
 import { Button } from "../ui/button";
 import { Id } from "@/convex/_generated/dataModel";
-import { AppMode, Role } from "@/lib/constant";
+import { AppMode, MessageStatusType, Role } from "@/lib/constant";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { AutosizeTextarea, AutosizeTextAreaRef } from "../ui/autosize-textarea";
-import { useAppContext } from "@/context/AppProvider";
+import { MessageType, useAppContext } from "@/context/AppProvider";
 import { cn } from "@/lib/utils";
+import { ConvexError } from "convex/values";
+import { useUpgradeModal } from "@/hooks/use-upgrade-modal";
 
 interface ChatInputProps {
-  jobId: Id<"jobs">;
+  jobId: string;
   userId: string | null;
-  isDisabled?: boolean;
+  sessionId: string;
+  isDisabled: boolean;
 }
 
-const ChatInput = ({ jobId, userId, isDisabled }: ChatInputProps) => {
-  const { jobMode, handleSwitchMode, updateMessages, messages } =
-    useAppContext();
+const ChatInput = ({
+  jobId,
+  userId,
+  isDisabled,
+  sessionId,
+}: ChatInputProps) => {
+  const { jobMode, handleSwitchMode, messages } = useAppContext();
   const [input, setInput] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const textareaRef = useRef<AutosizeTextAreaRef>(null);
+  const { openModal: openUpgradeModal } = useUpgradeModal();
 
-  const sendAnswer = useMutation(api.interview.sendAnswer);
+  const answerQuestion = useMutation(api.interviewSession.answerQuestion);
   const sendMessage = useMutation(api.jobInsightConversation.sendUserMessage);
 
   const handleInputChange = useCallback(
@@ -40,45 +42,52 @@ const ChatInput = ({ jobId, userId, isDisabled }: ChatInputProps) => {
     []
   );
 
-  const handleInput = useCallback(async () => {
+  const handleInput = async () => {
     if (!input.trim() || isDisabled || !userId) return;
     setIsLoading(true);
     try {
-      // const tempId = `temp-${Date.now()}`;
-      // const newMsg = {
-      //   userId,
-      //   jobId,
-      //   text: input,
-      //   role: Role.USER,
-      //   createdAt: Date.now(),
-      //   _id: tempId, // Use temporary ID
-      // };
-      // updateMessages(newMsg);
-
       if (jobMode === AppMode.JOB_INSIGHT) {
-        const messageId = await sendMessage({
+        await sendMessage({
           jobId,
           userId,
           message: input,
         });
-      } else {
-        // Handle other modes (e.g., interview session)
-        // await sendAnswer({
-        //   interviewId,
-        //   userId: userId,
-        //   answer: answer,
-        // });
+      } else if (jobMode === AppMode.INTERVIEW_SESSION) {
+        const questionId = getLastAIQuestionId(messages);
+        await answerQuestion({
+          sessionId,
+          questionId,
+          answerText: input,
+        });
       }
       setInput("");
     } catch (error) {
-      console.error("Failed to send answer:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to send answer."
-      );
+      const errorMessage =
+        error instanceof ConvexError && error.data?.message
+          ? error.data.message
+          : "Failed to send message.";
+      if (
+        error instanceof ConvexError &&
+        error.data.type === "INSUFFICIENT_CREDITS"
+      )
+        openUpgradeModal();
+      toast.error(errorMessage);
+      return null;
     } finally {
       setIsLoading(false);
     }
-  }, [input, jobId, userId]);
+  };
+
+  const getLastAIQuestionId = (messages: MessageType[]) => {
+    const lastAIQuestion = messages
+      .filter(
+        (message) =>
+          message.role === Role.AI &&
+          message.type === MessageStatusType.QUESTION
+      )
+      .pop(); // Get the last item in the filtered array
+    return lastAIQuestion?._id || "";
+  };
 
   return (
     <div className="sticky bottom-0 left-0 w-full">

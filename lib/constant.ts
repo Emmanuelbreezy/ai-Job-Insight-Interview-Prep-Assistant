@@ -5,6 +5,14 @@ export const Role = {
 
 export type RoleType = keyof typeof Role;
 
+export const JobStatus = {
+  PROCESSING: "PROCESSING",
+  READY: "READY",
+  FAILED: "FAILED",
+} as const;
+
+export type JobStatusType = keyof typeof JobStatus;
+
 export const AppMode = {
   JOB_INSIGHT: "JOB_INSIGHT",
   INTERVIEW_SESSION: "INTERVIEW_SESSION",
@@ -24,27 +32,20 @@ export const InterviewStatus = {
 export type InterviewStatusType = keyof typeof InterviewStatus;
 
 export const QuestionType = {
-  TEXT: "TEXT",
-  CODE: "CODE",
-  MULTIPLE_CHOICE: "MULTIPLE_CHOICE",
+  TECHNICAL: "TECHNICAL",
   ORAL: "ORAL",
   SCENARIO: "SCENARIO",
 } as const;
 
-export const MessageType = {
+export type QuestionType = keyof typeof QuestionType;
+
+export const MessageStatusType = {
   SYSTEM: "SYSTEM",
-  CHAT: "CHAT",
   QUESTION: "QUESTION",
   ANSWER: "ANSWER",
 } as const;
 
-export const JobStatus = {
-  PROCESSING: "PROCESSING",
-  READY: "READY",
-  FAILED: "FAILED",
-} as const;
-
-export type JobStatus = keyof typeof JobStatus;
+export type MessageStatusType = keyof typeof MessageStatusType;
 
 export const JobInsightsType = {
   JOB_INFO: "JOB_INFO",

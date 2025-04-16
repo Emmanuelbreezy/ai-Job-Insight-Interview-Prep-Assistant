@@ -1,14 +1,5 @@
 "use client";
 
-import { Id } from "@/convex/_generated/dataModel";
-import {
-  AppMode,
-  AppModeType,
-  InterviewStatus,
-  InterviewStatusType,
-  JobInsightStatusType,
-  JobInsightsType,
-} from "@/lib/constant";
 import {
   createContext,
   ReactNode,
@@ -17,18 +8,44 @@ import {
   useContext,
   SetStateAction,
 } from "react";
+import { Id } from "@/convex/_generated/dataModel";
+import {
+  AppMode,
+  AppModeType,
+  InterviewStatus,
+  InterviewStatusType,
+  JobInsightStatusType,
+  JobInsightsType,
+  MessageStatusType,
+  QuestionType,
+} from "@/lib/constant";
 
-export type MessageType = {
+export type JobInsightMessage = {
   _id?: string;
   userId: string;
-  jobId: Id<"jobs">; // Changed from interviewId to jobId
+  jobId: Id<"jobs">;
   text: string;
   role: "USER" | "AI";
-  type?: JobInsightsType | null; // Added type
+  type?: JobInsightsType | null;
   status?: JobInsightStatusType;
   createdAt?: number;
-  updatedAt?: number; // Added updatedAt
+  updatedAt?: number;
 };
+
+export type InterviewMessage = {
+  _id?: string;
+  sessionId: Id<"interviewSessions">;
+  text: string;
+  role: "USER" | "AI";
+  type?: MessageStatusType;
+  questionType?: QuestionType | null;
+  questionNumber?: number;
+  questionId?: Id<"interviewMessages">;
+  timeLimit?: number;
+  createdAt?: number;
+};
+
+export type MessageType = JobInsightMessage | InterviewMessage;
 
 type AppContextType = {
   messages: MessageType[];

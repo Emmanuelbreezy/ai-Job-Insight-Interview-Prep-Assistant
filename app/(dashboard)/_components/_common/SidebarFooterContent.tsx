@@ -7,16 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Progress } from "@/components/ui/progress";
-
-interface UserUsage {
-  portfoliosGenerated: number;
-  messagesSent: number;
-  planLimit: {
-    portfolios: number;
-    messages: number;
-  };
-}
+import { PLANS } from "@/lib/api-limit";
 
 interface SidebarFooterContentProps {
   isSignedIn: boolean;
@@ -25,7 +16,7 @@ interface SidebarFooterContentProps {
   userInitial: string;
   emailAddress: string;
   userPlan: "FREE" | "PRO";
-  userUsage: UserUsage;
+  credits: number;
   onUpgradeClick: () => void;
   onSignOut: () => void;
 }
@@ -37,7 +28,7 @@ export const SidebarFooterContent = ({
   emailAddress,
   userInitial,
   userPlan,
-  userUsage,
+  credits,
   onUpgradeClick,
   onSignOut,
 }: SidebarFooterContentProps) => {
@@ -52,17 +43,12 @@ export const SidebarFooterContent = ({
     );
   }
 
-  const portfolioProgress =
-    (userUsage.portfoliosGenerated / userUsage.planLimit.portfolios) * 100;
-  const messageProgress =
-    (userUsage.messagesSent / userUsage.planLimit.messages) * 100;
-
   return (
     <div className="flex flex-col gap-3">
       {isSignedIn && userPlan === "FREE" && (
         <div className="bg-gradient-to-r from-purple-600 to-primary rounded-lg p-4">
           <h3 className="text-white font-semibold text-sm mb-1">
-            Upgrade to Pro
+            Credits Balance: {credits?.toFixed(1)}
           </h3>
           <p className="text-white/80 text-xs mb-2">Unlock premium features</p>
           <Button
@@ -71,7 +57,7 @@ export const SidebarFooterContent = ({
             className="w-full bg-white text-primary font-semibold hover:bg-white/90 text-sm"
           >
             <Sparkles />
-            Upgrade Now
+            Buy Credits
           </Button>
         </div>
       )}
@@ -108,37 +94,13 @@ export const SidebarFooterContent = ({
                 <span className="text-sm font-medium">Current Plan</span>
                 <span
                   className={`text-sm ${
-                    userPlan === "PRO"
+                    userPlan === PLANS.PRO
                       ? "text-primary"
                       : "text-muted-foreground"
                   }`}
                 >
                   {userPlan} Plan
                 </span>
-              </div>
-
-              {/* Usage Statistics */}
-              <div className="space-y-3">
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span>Portfolios Generated</span>
-                    <span>
-                      {userUsage.portfoliosGenerated}/
-                      {userUsage.planLimit.portfolios}
-                    </span>
-                  </div>
-                  <Progress value={portfolioProgress} className="h-2" />
-                </div>
-
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span>AI Messages</span>
-                    <span>
-                      {userUsage.messagesSent}/{userUsage.planLimit.messages}
-                    </span>
-                  </div>
-                  <Progress value={messageProgress} className="h-2" />
-                </div>
               </div>
 
               {/* Sign Out Button */}

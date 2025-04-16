@@ -18,13 +18,3 @@ export const chatSession = genAI.chats.create({
   },
   history: [],
 });
-
-// export const potfoiloSession = ai.({
-//   model: "gemini-2.0-flash",
-//   config: {
-//     maxOutputTokens: 8192,
-//     temperature: 1,
-//     responseMimeType: "application/json",
-//   },
-//   history: [],
-// });

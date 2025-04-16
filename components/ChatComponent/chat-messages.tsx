@@ -1,62 +1,78 @@
-import React, { useEffect, useMemo, useState } from "react";
+"use client";
+import React, { useMemo, useState } from "react";
 import { Loader, MessageSquareTextIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAppContext } from "@/context/AppProvider";
-import { AppMode, Role } from "@/lib/constant";
+import { AppMode, AppModeType, Role } from "@/lib/constant";
 import { Id } from "@/convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import useScrollToBottom from "@/hooks/use-scroll-bottom";
 import { Avatar, AvatarFallback } from "../ui/avatar";
+import { useInterviewSessionId } from "@/hooks/use-interview-session-id";
+import { Button } from "../ui/button";
+import { ConvexError } from "convex/values";
+import { toast } from "sonner";
+import { useUpgradeModal } from "@/hooks/use-upgrade-modal";
 
 const ChatMessages = (props: {
   jobId: Id<"jobs">;
   userId: string | null;
   userName: string | null;
+  data: any;
+  jobMode: AppModeType | null;
+  isSessionCompleted: boolean;
 }) => {
-  const { jobId, userId, userName } = props;
-  const { setMessages, jobMode } = useAppContext();
-  const [isLoading, setIsLoading] = useState(false);
+  const { data, isSessionCompleted, jobMode, jobId, userId, userName } = props;
+  const { sessionId, setSession } = useInterviewSessionId();
   const [isStartingSession, setIsStartingSession] = useState(false);
+  const { openModal: openUpgradeModal } = useUpgradeModal();
 
-  const data = useQuery(api.job.getByJobId, {
-    jobId,
-    jobMode: jobMode || AppMode.JOB_INSIGHT,
-  });
+  const containerEndRef = useScrollToBottom([data]);
 
   const createInterviewSession = useMutation(
     api.interviewSession.createInterviewSession
   );
-
-  const containerEndRef = useScrollToBottom([data, isLoading]);
-
-  useEffect(() => {
-    if (!data) {
-      setIsLoading(true);
-      return;
-    }
-    if (data.success) {
-      setMessages(data.data || []);
-      setIsLoading(false);
-    } else {
-      setIsLoading(false);
-    }
-  }, [data, setMessages]);
 
   const messages = useMemo(() => {
     if (!data || !data.success) return [];
     return data.data || [];
   }, [data]);
 
+  // Handle loading state
+  if (
+    (jobMode === AppMode.INTERVIEW_SESSION &&
+      sessionId &&
+      data === undefined) ||
+    (jobMode === AppMode.JOB_INSIGHT && data === undefined)
+  ) {
+    return (
+      <div className="w-full flex justify-center gap-2 p-5">
+        <Loader className="h-8 w-8 animate-spin mx-auto" />
+      </div>
+    );
+  }
+
   const startInterviewSession = async () => {
     if (!userId) return;
     setIsStartingSession(true);
     try {
-      await createInterviewSession({
+      const sessionId = await createInterviewSession({
         userId: userId,
         jobId: jobId,
       });
+      setSession(sessionId);
     } catch (error) {
+      const errorMessage =
+        error instanceof ConvexError && error.data?.message
+          ? error.data.message
+          : "Failed to send message.";
+      if (
+        error instanceof ConvexError &&
+        error.data.type === "INSUFFICIENT_CREDITS"
+      )
+        openUpgradeModal();
+      toast.error(errorMessage);
+      return null;
     } finally {
       setIsStartingSession(false);
     }
@@ -69,18 +85,14 @@ const ChatMessages = (props: {
       flex-col gap-4 p-3 overflow-y-auto pt-8 pb-20
      "
       >
-        {isLoading ? (
-          <div className="w-full flex flex-col justify-center gap-2">
-            <Loader className="h-8 w-8 animate-spin mx-auto" />
-          </div>
-        ) : messages && messages?.length > 0 ? (
+        {messages && messages?.length > 0 ? (
           <>
             {/* Render Messages */}
-            {messages?.map((message, index) => {
+            {messages?.map((message: any, index: number) => {
               const isUserMessage = message.role === Role.USER;
               return (
                 <div
-                  key={`${message._id}-index`}
+                  key={`${message._id}-${index}`}
                   className={cn("flex items-end", {
                     "justify-end": isUserMessage,
                   })}
@@ -121,7 +133,10 @@ const ChatMessages = (props: {
                       </div>
                       {isUserMessage && (
                         <Avatar className="w-8 h-8">
-                          <AvatarFallback className="shrink-0  bg-black/80 text-white text-sm">
+                          <AvatarFallback
+                            className="shrink-0 
+                           bg-black/80 text-white text-sm"
+                          >
                             {userName?.charAt(0) || "U"}
                           </AvatarFallback>
                         </Avatar>
@@ -131,9 +146,26 @@ const ChatMessages = (props: {
                 </div>
               );
             })}
+
+            {isSessionCompleted && (
+              <div className="flex flex-col items-center justify-center">
+                <Button
+                  onClick={startInterviewSession}
+                  className="!bg-black text-white px-6 py-2"
+                >
+                  {isStartingSession && (
+                    <Loader className="w-4 h-4 animate-spin" />
+                  )}
+                  🚀 Start a New Session
+                </Button>
+              </div>
+            )}
           </>
         ) : jobMode === AppMode.JOB_INSIGHT ? (
-          <div className="flex-1 flex flex-col items-center justify-center gap-2">
+          <div
+            className="flex-1 flex flex-col items-center justify-center 
+          gap-2"
+          >
             <MessageSquareTextIcon className="h-8 w-8" />
             <h3 className="font-semibold text-lg">
               Your Job Insight Assistant is Ready!
@@ -143,10 +175,12 @@ const ChatMessages = (props: {
             </p>
           </div>
         ) : (
-          <InterviewSessionWel
-            isStartingSession={isStartingSession}
-            onStartSession={startInterviewSession}
-          />
+          !sessionId && (
+            <InterviewSessionWel
+              isStartingSession={isStartingSession}
+              onStartSession={startInterviewSession}
+            />
+          )
         )}
         <br />
         <br />
@@ -171,16 +205,15 @@ const InterviewSessionWel = ({
         Your Interview Coach is Ready!
       </h3>
       <p className="text-gray-500 text-sm mt-1">
-        Practice and refine your skills for the position.
+        (10) questions to practice and refine your skills for the position.
       </p>
-      <button
+      <Button
         onClick={onStartSession}
-        className="mt-4 px-6 py-2 bg-black text-white rounded-lg
-         hover:bg-black/80 transition-colors"
+        className="mt-4 px-6 py-2 !bg-black !text-white"
       >
         {isStartingSession && <Loader className="w-4 h-4 animate-spin" />}
         Start Interview Session
-      </button>
+      </Button>
     </div>
   );
 };

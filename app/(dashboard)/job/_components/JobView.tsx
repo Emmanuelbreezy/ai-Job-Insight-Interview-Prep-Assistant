@@ -10,11 +10,11 @@ const JobView = (props: { jobId: Id<"jobs"> }) => {
   const { jobMode } = useAppContext();
   return (
     <div className="flex w-full h-screen overflow-y-auto ">
-      <div className="h-full">
+      <div className="w-full">
         {jobMode === AppMode.JOB_INSIGHT ? (
           <JobDetails jobId={props.jobId} />
         ) : (
-          <InterviewSessionsHistory />
+          <InterviewSessionsHistory jobId={props.jobId} />
         )}
       </div>
     </div>

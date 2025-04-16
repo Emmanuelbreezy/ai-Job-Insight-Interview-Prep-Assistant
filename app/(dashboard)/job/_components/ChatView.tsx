@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import ChatComponent from "@/components/ChatView";
+import ChatComponent from "@/components/ChatComponent";
 import { useUser } from "@clerk/nextjs";
 import { Id } from "@/convex/_generated/dataModel";
 import { useAppContext } from "@/context/AppProvider";

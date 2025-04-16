@@ -1,9 +1,8 @@
 import {
   InterviewStatus,
   JobInsightStatus,
-  JobInsightsType,
   JobStatus,
-  MessageType,
+  MessageStatusType,
   QuestionType,
   Role,
 } from "@/lib/constant";
@@ -66,15 +65,14 @@ export default defineSchema({
     text: v.string(),
     role: v.union(v.literal(Role.USER), v.literal(Role.AI)),
     type: v.union(
-      v.literal(MessageType.QUESTION),
-      v.literal(MessageType.ANSWER)
+      v.literal(MessageStatusType.QUESTION),
+      v.literal(MessageStatusType.ANSWER),
+      v.literal(MessageStatusType.SYSTEM)
     ),
     questionType: v.optional(
       v.union(
-        v.literal(QuestionType.TEXT),
-        v.literal(QuestionType.CODE),
-        v.literal(QuestionType.MULTIPLE_CHOICE),
         v.literal(QuestionType.ORAL),
+        v.literal(QuestionType.TECHNICAL),
         v.literal(QuestionType.SCENARIO),
         v.null()
       )
@@ -89,64 +87,69 @@ export default defineSchema({
     .index("by_question_id", ["questionId"]),
 
   interviewFeedback: defineTable({
-    messageId: v.id("interviewMessages"), // Reference to the message
+    sessionId: v.id("interviewSessions"),
+    questionId: v.id("interviewMessages"),
     score: v.number(),
-    strengths: v.array(v.string()),
+    grade: v.string(),
     improvements: v.array(v.string()),
-    sampleAnswer: v.optional(v.string()),
-    analysis: v.string(),
+    feedback: v.string(),
     createdAt: v.number(),
-  }).index("by_message", ["messageId"]),
+  }).index("by_session", ["sessionId"]),
 
-  interview: defineTable({
-    userId: v.string(), // Clerk user ID
-    jobTitle: v.optional(v.string()),
-    jobDescription: v.string(),
-    processedJobDescription: v.optional(v.string()),
-    status: v.union(
-      v.literal(InterviewStatus.PROCESSING),
-      v.literal(InterviewStatus.READY),
-      v.literal(InterviewStatus.FAILED),
-      v.literal(InterviewStatus.COMPLETED)
-    ),
-    createdAt: v.number(),
-    updatedAt: v.number(),
-  })
-    .index("by_user", ["userId"])
-    .index("by_status", ["status"]),
-  messages: defineTable({
-    userId: v.string(),
-    interviewId: v.id("interview"),
-    text: v.string(),
-    role: v.union(v.literal(Role.USER), v.literal(Role.AI)),
-    questionType: v.optional(
-      v.union(
-        v.literal(QuestionType.TEXT),
-        v.literal(QuestionType.CODE),
-        v.literal(QuestionType.MULTIPLE_CHOICE),
-        v.literal(QuestionType.ORAL),
-        v.literal(QuestionType.SCENARIO),
-        v.null()
-      )
-    ),
-    questionNumber: v.optional(v.number()),
-    messageType: v.union(
-      v.literal(MessageType.CHAT),
-      v.literal(MessageType.SYSTEM),
-      v.literal(MessageType.QUESTION),
-      v.literal(MessageType.ANSWER)
-    ),
-    timeLimit: v.optional(v.string()),
-    metadata: v.optional(v.any()),
-    createdAt: v.number(),
-  }).index("by_interview", ["interviewId"]),
+  //   userId: v.string(), // Clerk user ID
+  //   jobTitle: v.optional(v.string()),
+  //   jobDescription: v.string(),
+  //   processedJobDescription: v.optional(v.string()),
+  //   status: v.union(
+  //     v.literal(InterviewStatus.PROCESSING),
+  //     v.literal(InterviewStatus.READY),
+  //     v.literal(InterviewStatus.FAILED),
+  //     v.literal(InterviewStatus.COMPLETED)
+  //   ),
+  //   createdAt: v.number(),
+  //   updatedAt: v.number(),
+  // })
+  //   .index("by_user", ["userId"])
+  //   .index("by_status", ["status"]),
+  // messages: defineTable({
+  //   userId: v.string(),
+  //   interviewId: v.id("interview"),
+  //   text: v.string(),
+  //   role: v.union(v.literal(Role.USER), v.literal(Role.AI)),
+  //   // questionType: v.optional(
+  //   //   v.union(
+  //   //     v.literal(QuestionType.TEXT),
+  //   //     v.literal(QuestionType.CODE),
+  //   //     v.literal(QuestionType.MULTIPLE_CHOICE),
+  //   //     v.literal(QuestionType.ORAL),
+  //   //     v.literal(QuestionType.SCENARIO),
+  //   //     v.null()
+  //   //   )
+  //   // ),
+  //   questionNumber: v.optional(v.number()),
+  //   messageType: v.union(
+  //     v.literal(MessageType.CHAT),
+  //     v.literal(MessageType.SYSTEM),
+  //     v.literal(MessageType.QUESTION),
+  //     v.literal(MessageType.ANSWER)
+  //   ),
+  //   timeLimit: v.optional(v.string()),
+  //   metadata: v.optional(v.any()),
+  //   createdAt: v.number(),
+  // }).index("by_interview", ["interviewId"]),
 
+  // apiLimits: defineTable({
+  //   userId: v.string(),
+  //   plan: v.union(v.literal("FREE"), v.literal("PRO")),
+  //   jobCount: v.number(),
+  //   messageCount: v.number(),
+  //   createdAt: v.number(),
+  //   updatedAt: v.number(),
+  // }).index("by_user", ["userId"]),
   apiLimits: defineTable({
     userId: v.string(),
     plan: v.union(v.literal("FREE"), v.literal("PRO")),
-    fileCount: v.number(),
-    messageCount: v.number(),
-    lastReset: v.optional(v.number()),
+    credits: v.number(), // Remaining credits
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_user", ["userId"]),

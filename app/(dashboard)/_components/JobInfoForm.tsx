@@ -1,22 +1,29 @@
 "use client";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader, Send } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { AutosizeTextarea } from "@/components/ui/autosize-textarea";
+import {
+  AutosizeTextarea,
+  AutosizeTextAreaRef,
+} from "@/components/ui/autosize-textarea";
 import { Button } from "@/components/ui/button";
 import { useSignInModal } from "@/hooks/use-signin-modal";
+import { useUpgradeModal } from "@/hooks/use-upgrade-modal";
 
 const JobInfoForm = () => {
   const router = useRouter();
   const { isSignedIn, user } = useUser();
   const { open: openSignInModal } = useSignInModal();
+  const { openModal: openUpgradeModal } = useUpgradeModal();
 
   const [jobDescription, setJobDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const textareaRef = useRef<AutosizeTextAreaRef>(null);
 
   const createJob = useMutation(api.job.createJob);
 
@@ -40,11 +47,16 @@ const JobInfoForm = () => {
 
     setIsSubmitting(true);
     try {
-      const jobId = await createJob({
+      const response = await createJob({
         userId: user.id,
         jobDescription: jobDescription.trim(),
       });
-      router.push(`/job/${jobId}`);
+
+      if (!response.data && response.requiresUpgrade) {
+        openUpgradeModal();
+        return;
+      }
+      router.push(`/job/${response.data}`);
     } catch (error) {
       toast.error("Failed to create interview. Please try again.");
     } finally {
@@ -63,12 +75,20 @@ const JobInfoForm = () => {
       >
         <div className="flex flex-col gap-3.5 m-3.5">
           <AutosizeTextarea
+            ref={textareaRef}
             rows={3}
             maxHeight={180}
             minHeight={100}
             value={jobDescription}
             onChange={handleChange}
             disabled={false}
+            onKeyDown={(e) => {
+              if (isSubmitting) return;
+              if (e.key === "Enter" && !e.shiftKey) {
+                handleSubmit(e);
+                textareaRef?.current?.textArea?.focus();
+              }
+            }}
             placeholder="Paste Job title & description"
             className="resize-none pr-12 text-base !border-0 font-normal
                   !shadow-none !ring-0 focus-visible:!ring-offset-0 

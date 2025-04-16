@@ -16,13 +16,23 @@ import SignInPrompt from "./_common/SignInPrompt";
 import { SidebarFooterContent } from "./_common/SidebarFooterContent";
 import { useUpgradeModal } from "@/hooks/use-upgrade-modal";
 import JobSidebarList from "./JobSidebarList";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { FREE_USER_CREDIT_LIMIT, PLANS } from "@/lib/api-limit";
 
 const AppSidebar = () => {
   const { isSignedIn, user, isLoaded } = useUser();
   const { signOut } = useAuth();
   const { openModal } = useUpgradeModal();
-
   const userId = user?.id || null;
+
+  const apiLimits = useQuery(api.apiLimits.getUserCredits, {
+    userId: user?.id || "",
+  });
+
+  const isLoading = apiLimits === undefined;
+  const userPlan = apiLimits?.plan || PLANS.FREE;
+  const credits = apiLimits?.credits || 0;
 
   return (
     <>
@@ -66,15 +76,8 @@ const AppSidebar = () => {
             userName={user?.fullName!}
             emailAddress={user?.primaryEmailAddress?.emailAddress!}
             userInitial={user?.firstName?.charAt(0) || ""}
-            userPlan="FREE"
-            userUsage={{
-              portfoliosGenerated: 3,
-              messagesSent: 15,
-              planLimit: {
-                portfolios: 5,
-                messages: 20,
-              },
-            }}
+            userPlan={userPlan}
+            credits={credits}
             onUpgradeClick={() => openModal()}
             onSignOut={() =>
               signOut({

@@ -1,8 +1,9 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { AppMode, JobStatus } from "@/lib/constant";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
+import { CREDIT_COST, FREE_TIER_CREDITS, PLANS } from "@/lib/api-limit";
 
 export const createJob = mutation({
   args: {
@@ -10,6 +11,36 @@ export const createJob = mutation({
     jobDescription: v.string(),
   },
   handler: async (ctx, args) => {
+    // 1. Handle API credits
+    let apiLimits = await ctx.db
+      .query("apiLimits")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .unique();
+
+    // Initialize credits if new user
+    if (!apiLimits) {
+      const newLimitsId = await ctx.db.insert("apiLimits", {
+        userId: args.userId,
+        plan: PLANS.FREE,
+        credits: FREE_TIER_CREDITS,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+      apiLimits = await ctx.db.get(newLimitsId);
+    }
+    // Verify credits
+    if (!apiLimits) {
+      throw new ConvexError("Failed to initialize your account limits");
+    }
+
+    if (apiLimits.credits < 1) {
+      return {
+        data: null,
+        message: "You have run out of credits. Buy more to continue.",
+        requiresUpgrade: true,
+      };
+    }
+
     const jobId = await ctx.db.insert("jobs", {
       userId: args.userId,
       jobTitle: "Untitled",
@@ -20,14 +51,19 @@ export const createJob = mutation({
       createdAt: Date.now(),
       updatedAt: Date.now(),
     });
-    // Call internal function to process with AI
+    // 3. Deduct credit after successful job creation
+    await ctx.runMutation(api.apiLimits.deductCredit, {
+      userId: args.userId,
+      amount: CREDIT_COST.JOB_CREATION,
+    });
+
+    // 4. Initiate AI processing
     await ctx.scheduler.runAfter(0, internal.actions.processJobWithAI, {
       jobId,
       userId: args.userId,
       jobDescription: args.jobDescription,
     });
-
-    return jobId;
+    return { data: jobId, success: true };
   },
 });
 
@@ -91,3 +127,30 @@ export const getByJobId = query({
     return { data: [], success: false };
   },
 });
+
+// export const createJob = mutation({
+//   args: {
+//     userId: v.string(),
+//     jobDescription: v.string(),
+//   },
+//   handler: async (ctx, args) => {
+//     const jobId = await ctx.db.insert("jobs", {
+//       userId: args.userId,
+//       jobTitle: "Untitled",
+//       originalDescription: args.jobDescription,
+//       processedDescription: "",
+//       htmlFormatDescription: "",
+//       status: JobStatus.PROCESSING,
+//       createdAt: Date.now(),
+//       updatedAt: Date.now(),
+//     });
+//     // Call internal function to process with AI
+//     await ctx.scheduler.runAfter(0, internal.actions.processJobWithAI, {
+//       jobId,
+//       userId: args.userId,
+//       jobDescription: args.jobDescription,
+//     });
+
+//     return jobId;
+//   },
+// });
