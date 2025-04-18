@@ -63,3 +63,11 @@ export const JobInsightStatus = {
 } as const;
 
 export type JobInsightStatusType = keyof typeof JobInsightStatus;
+
+export const PaymentStatus = {
+  PENDING: "PENDING",
+  COMPLETED: "COMPLETED",
+  FAILED: "FAILED",
+} as const;
+
+export type PaymentStatusType = keyof typeof PaymentStatus;

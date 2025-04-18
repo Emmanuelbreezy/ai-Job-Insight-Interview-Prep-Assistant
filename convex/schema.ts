@@ -3,6 +3,7 @@ import {
   JobInsightStatus,
   JobStatus,
   MessageStatusType,
+  PaymentStatus,
   QuestionType,
   Role,
 } from "@/lib/constant";
@@ -96,60 +97,24 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_session", ["sessionId"]),
 
-  //   userId: v.string(), // Clerk user ID
-  //   jobTitle: v.optional(v.string()),
-  //   jobDescription: v.string(),
-  //   processedJobDescription: v.optional(v.string()),
-  //   status: v.union(
-  //     v.literal(InterviewStatus.PROCESSING),
-  //     v.literal(InterviewStatus.READY),
-  //     v.literal(InterviewStatus.FAILED),
-  //     v.literal(InterviewStatus.COMPLETED)
-  //   ),
-  //   createdAt: v.number(),
-  //   updatedAt: v.number(),
-  // })
-  //   .index("by_user", ["userId"])
-  //   .index("by_status", ["status"]),
-  // messages: defineTable({
-  //   userId: v.string(),
-  //   interviewId: v.id("interview"),
-  //   text: v.string(),
-  //   role: v.union(v.literal(Role.USER), v.literal(Role.AI)),
-  //   // questionType: v.optional(
-  //   //   v.union(
-  //   //     v.literal(QuestionType.TEXT),
-  //   //     v.literal(QuestionType.CODE),
-  //   //     v.literal(QuestionType.MULTIPLE_CHOICE),
-  //   //     v.literal(QuestionType.ORAL),
-  //   //     v.literal(QuestionType.SCENARIO),
-  //   //     v.null()
-  //   //   )
-  //   // ),
-  //   questionNumber: v.optional(v.number()),
-  //   messageType: v.union(
-  //     v.literal(MessageType.CHAT),
-  //     v.literal(MessageType.SYSTEM),
-  //     v.literal(MessageType.QUESTION),
-  //     v.literal(MessageType.ANSWER)
-  //   ),
-  //   timeLimit: v.optional(v.string()),
-  //   metadata: v.optional(v.any()),
-  //   createdAt: v.number(),
-  // }).index("by_interview", ["interviewId"]),
-
-  // apiLimits: defineTable({
-  //   userId: v.string(),
-  //   plan: v.union(v.literal("FREE"), v.literal("PRO")),
-  //   jobCount: v.number(),
-  //   messageCount: v.number(),
-  //   createdAt: v.number(),
-  //   updatedAt: v.number(),
-  // }).index("by_user", ["userId"]),
   apiLimits: defineTable({
     userId: v.string(),
-    plan: v.union(v.literal("FREE"), v.literal("PRO")),
     credits: v.number(), // Remaining credits
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
+
+  payments: defineTable({
+    userId: v.string(),
+    paypalOrderId: v.optional(v.string()),
+    transactionId: v.optional(v.string()),
+    amount: v.number(),
+    credits: v.number(),
+    status: v.union(
+      v.literal(PaymentStatus.PENDING),
+      v.literal(PaymentStatus.COMPLETED),
+      v.literal(PaymentStatus.FAILED)
+    ),
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_user", ["userId"]),

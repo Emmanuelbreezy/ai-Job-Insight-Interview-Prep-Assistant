@@ -1,5 +1,5 @@
 "use client";
-import { Loader, Sparkles } from "lucide-react";
+import { Loader, LogOutIcon, Sparkles } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,7 +7,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { PLANS } from "@/lib/api-limit";
 
 interface SidebarFooterContentProps {
   isSignedIn: boolean;
@@ -15,8 +14,8 @@ interface SidebarFooterContentProps {
   userName: string;
   userInitial: string;
   emailAddress: string;
-  userPlan: "FREE" | "PRO";
   credits: number;
+  loadingCredit: boolean;
   onUpgradeClick: () => void;
   onSignOut: () => void;
 }
@@ -27,14 +26,11 @@ export const SidebarFooterContent = ({
   userName,
   emailAddress,
   userInitial,
-  userPlan,
   credits,
+  loadingCredit,
   onUpgradeClick,
   onSignOut,
 }: SidebarFooterContentProps) => {
-  /// Calculates portfolio and message usage percentages
-  // based on user's current usage vs plan limits
-
   if (!isLoaded) {
     return (
       <div className="flex items-center justify-center pb-5">
@@ -45,10 +41,14 @@ export const SidebarFooterContent = ({
 
   return (
     <div className="flex flex-col gap-3">
-      {isSignedIn && userPlan === "FREE" && (
+      {isSignedIn && (
         <div className="bg-gradient-to-r from-purple-600 to-primary rounded-lg p-4">
           <h3 className="text-white font-semibold text-sm mb-1">
-            Credits Balance: {credits?.toFixed(1)}
+            {loadingCredit ? (
+              <Loader />
+            ) : (
+              `Credits Balance: ${credits?.toFixed(1)}`
+            )}
           </h3>
           <p className="text-white/80 text-xs mb-2">Unlock premium features</p>
           <Button
@@ -83,32 +83,21 @@ export const SidebarFooterContent = ({
             </div>
           </PopoverTrigger>
           <PopoverContent
-            side="right"
-            sideOffset={20}
-            className="w-80 p-4 drop-shadow-2xl"
+            side="top"
+            className="w-64 px-4 pt-5 pb-2 bg-[rgb(40,40,40)] !text-white border-gray-600"
             align="end"
           >
-            <div className="space-y-4">
-              {/* Plan Information */}
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Current Plan</span>
-                <span
-                  className={`text-sm ${
-                    userPlan === PLANS.PRO
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {userPlan} Plan
-                </span>
-              </div>
-
+            <div className="space-y-2">
+              <h4 className="font-semibold leading-none text-sm mb-1 pl-1">
+                My Account
+              </h4>
               {/* Sign Out Button */}
               <Button
-                variant="outline"
-                className="w-full text-sm"
+                variant="ghost"
+                className="w-full justify-start text-sm !pl-1 !ring-0"
                 onClick={onSignOut}
               >
+                <LogOutIcon className="w-4 h-4" />
                 Sign Out
               </Button>
             </div>

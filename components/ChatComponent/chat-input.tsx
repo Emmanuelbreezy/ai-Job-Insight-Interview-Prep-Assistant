@@ -3,7 +3,6 @@ import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Lightbulb, Loader, MessageSquare, Send } from "lucide-react";
 import { Button } from "../ui/button";
-import { Id } from "@/convex/_generated/dataModel";
 import { AppMode, MessageStatusType, Role } from "@/lib/constant";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -12,6 +11,7 @@ import { MessageType, useAppContext } from "@/context/AppProvider";
 import { cn } from "@/lib/utils";
 import { ConvexError } from "convex/values";
 import { useUpgradeModal } from "@/hooks/use-upgrade-modal";
+import { JobInsightPrompts } from "./Job-insight-prompt";
 
 interface ChatInputProps {
   jobId: string;
@@ -42,7 +42,7 @@ const ChatInput = ({
     []
   );
 
-  const handleInput = async () => {
+  const handleInput = async (input: string) => {
     if (!input.trim() || isDisabled || !userId) return;
     setIsLoading(true);
     try {
@@ -97,8 +97,12 @@ const ChatInput = ({
       >
         <div
           className="relative flex h-full flex-1 items-stretch 
-        md:flex-col px-4 pt-3 -mb-3"
+        md:flex-col px-4 pt-3 -mb-3 w-full"
         >
+          {/* Suggested Prompts */}
+          {jobMode === AppMode.JOB_INSIGHT && (
+            <JobInsightPrompts isDisabled={isDisabled} onSubmit={handleInput} />
+          )}
           <div
             className="relative flex flex-col w-full flex-grow
         border-zinc-300 mx-2 md:mx-0 items-stretch transition-all
@@ -113,14 +117,13 @@ const ChatInput = ({
               rows={1}
               maxHeight={200}
               minHeight={20}
-              enterKeyHint="send"
               onChange={handleInputChange}
               value={input}
               disabled={isDisabled}
               onKeyUp={(e) => {
                 if (isLoading) return;
                 if (e.key === "Enter" && !e.shiftKey) {
-                  handleInput();
+                  handleInput(input);
                   textareaRef.current?.textArea?.focus();
                 }
               }}
@@ -170,7 +173,7 @@ const ChatInput = ({
                 disabled:pointer-events-none disabled:!bg-gray-500"
                 aria-label="send message"
                 onClick={() => {
-                  handleInput();
+                  handleInput(input);
                   textareaRef.current?.textArea?.focus();
                 }}
               >

@@ -74,7 +74,8 @@ export const createMessage = mutation({
     role: v.union(v.literal(Role.USER), v.literal(Role.AI)),
     type: v.union(
       v.literal(MessageStatusType.QUESTION),
-      v.literal(MessageStatusType.ANSWER)
+      v.literal(MessageStatusType.ANSWER),
+      v.literal(MessageStatusType.SYSTEM)
     ),
     questionType: v.optional(
       v.union(
@@ -101,6 +102,28 @@ export const createMessage = mutation({
       createdAt: Date.now(),
     });
     return messageId;
+  },
+});
+
+export const insertFeedback = mutation({
+  args: {
+    sessionId: v.id("interviewSessions"),
+    questionId: v.id("interviewMessages"),
+    score: v.number(),
+    grade: v.string(),
+    improvements: v.array(v.string()),
+    feedback: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.insert("interviewFeedback", {
+      sessionId: args.sessionId,
+      questionId: args.questionId,
+      score: args.score,
+      grade: args.grade,
+      improvements: args.improvements,
+      feedback: args.feedback,
+      createdAt: Date.now(),
+    });
   },
 });
 
@@ -190,7 +213,7 @@ export const answerQuestion = mutation({
       }),
     ]);
     // Check if the interview is completed
-    if (nextQuestionNumber >= session.totalQuestions) {
+    if (nextQuestionNumber >= 5) {
       await Promise.all([
         ctx.db.patch(sessionId, {
           status: InterviewStatus.COMPLETED,
@@ -320,17 +343,16 @@ export const getInterviewSessionsByJobId = query({
 export const generateInterviewFeedback = mutation({
   args: { sessionId: v.id("interviewSessions"), userId: v.string() },
   handler: async (ctx, args) => {
-    const session = await ctx.db.get(args.sessionId);
-    if (!session) throw new ConvexError("Session not found");
-    // Fetch all messages for the session
     const messages = await ctx.db
       .query("interviewMessages")
       .withIndex("by_session", (q) => q.eq("sessionId", args.sessionId))
       .collect();
-
-    const questions = messages.filter((msg) => msg.role === Role.AI);
-    const answers = messages.filter((msg) => msg.role === Role.USER);
-
+    const questions = messages.filter(
+      (msg) => msg.type === MessageStatusType.QUESTION
+    );
+    const answers = messages.filter(
+      (msg) => msg.type === MessageStatusType.ANSWER
+    );
     // Prepare the questions and answers for the prompt
     const questionsAndAnswers = questions.map((question) => {
       const answer = answers.find((ans) => ans.questionId === question._id);
@@ -342,9 +364,29 @@ export const generateInterviewFeedback = mutation({
         questionId: question._id,
       };
     });
+    console.log(questionsAndAnswers, "questionsAndAnswers");
 
+    await ctx.scheduler.runAfter(
+      0,
+      internal.interviewSession.generateAIFeedback,
+      {
+        sessionId: args.sessionId,
+        userId: args.userId,
+        questionsAndAnswers,
+      }
+    );
+  },
+});
+
+export const generateAIFeedback = internalAction({
+  args: {
+    userId: v.string(),
+    sessionId: v.id("interviewSessions"),
+    questionsAndAnswers: v.any(),
+  },
+  handler: async (ctx, args) => {
     try {
-      const prompt = getInterviewFeedbackPrompt(questionsAndAnswers);
+      const prompt = getInterviewFeedbackPrompt(args.questionsAndAnswers);
       const response = await genAI.models.generateContent({
         model: "gemini-2.0-flash",
         contents: [{ role: "user", parts: [{ text: prompt }] }],
@@ -354,18 +396,18 @@ export const generateInterviewFeedback = mutation({
           responseMimeType: "application/json",
         },
       });
-      // Parse the AI response
       if (!response.text) throw new ConvexError("Failed to generate feedback");
       const feedbackList = JSON.parse(response.text);
+      console.log(feedbackList, "feedbackList");
+
       for (const feedback of feedbackList) {
-        await ctx.db.insert("interviewFeedback", {
+        await ctx.runMutation(api.interviewSession.insertFeedback, {
           sessionId: args.sessionId,
           questionId: feedback.questionId,
           score: feedback.score,
           grade: feedback.grade,
           improvements: feedback.improvements,
           feedback: feedback.feedback,
-          createdAt: Date.now(),
         });
       }
       // Deduct credits for feedback
@@ -373,16 +415,15 @@ export const generateInterviewFeedback = mutation({
         userId: args.userId,
         amount: CREDIT_COST.INTERVIEW_FEEDBACK,
       });
-
       // Notify the user that feedback is ready
-      await ctx.db.insert("interviewMessages", {
+      await ctx.runMutation(api.interviewSession.createMessage, {
         sessionId: args.sessionId,
         text: "🎉 Your feedback is ready! 🎉 Please check it now! 📝",
         role: Role.AI,
         type: MessageStatusType.SYSTEM,
-        createdAt: Date.now(),
       });
     } catch (error) {
+      console.error(error);
       throw new ConvexError("Failed to generate feedback");
     }
   },

@@ -87,7 +87,7 @@ const welcomeMessage = (title: string) => `
       <p>Identify key skills and gaps to focus on.</p>
     </li>
     <li style="margin-bottom: 0.5rem;">
-      <h5 style="font-weight: 500;">📊 Job-Specific Insights:</h5>
+      <h5 style="font-weight: 500;">📊Specific Insights:</h5>
       <p>Understand the role's requirements, responsibilities, and expectations.</p>
     </li>
   </ul>

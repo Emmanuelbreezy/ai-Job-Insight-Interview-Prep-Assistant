@@ -18,7 +18,7 @@ import { useUpgradeModal } from "@/hooks/use-upgrade-modal";
 import JobSidebarList from "./JobSidebarList";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { FREE_USER_CREDIT_LIMIT, PLANS } from "@/lib/api-limit";
+import { FREE_TIER_CREDITS, PLANS } from "@/lib/api-limit";
 
 const AppSidebar = () => {
   const { isSignedIn, user, isLoaded } = useUser();
@@ -31,8 +31,8 @@ const AppSidebar = () => {
   });
 
   const isLoading = apiLimits === undefined;
-  const userPlan = apiLimits?.plan || PLANS.FREE;
-  const credits = apiLimits?.credits || 0;
+  const credits =
+    apiLimits?.credits !== undefined ? apiLimits.credits : FREE_TIER_CREDITS;
 
   return (
     <>
@@ -42,7 +42,7 @@ const AppSidebar = () => {
       m-[4px_0px_0px]"
         >
           <Link href="/" className="text-white text-xl">
-            Interview<b className="text-primary">Assistant</b>.ai
+            Job<b className="text-primary">Assistant</b>.ai
           </Link>
           <SidebarTrigger className="!text-white !p-0 !bg-gray-800"></SidebarTrigger>
         </SidebarHeader>
@@ -67,7 +67,7 @@ const AppSidebar = () => {
           {userId && <JobSidebarList {...{ userId }} />}
 
           {/* {SignIn Prompt} */}
-          {!isSignedIn && <SignInPrompt />}
+          {!isSignedIn && isLoaded ? <SignInPrompt /> : null}
         </SidebarContent>
         <SidebarFooter>
           <SidebarFooterContent
@@ -76,8 +76,8 @@ const AppSidebar = () => {
             userName={user?.fullName!}
             emailAddress={user?.primaryEmailAddress?.emailAddress!}
             userInitial={user?.firstName?.charAt(0) || ""}
-            userPlan={userPlan}
             credits={credits}
+            loadingCredit={isLoading}
             onUpgradeClick={() => openModal()}
             onSignOut={() =>
               signOut({

@@ -1,5 +1,4 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import {
   Dialog,
@@ -8,27 +7,60 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useUpgradeModal } from "@/hooks/use-upgrade-modal";
-import { InfoIcon, Sparkles } from "lucide-react";
+import { InfoIcon, Loader, Sparkles } from "lucide-react";
 import { useState } from "react";
+import { useUser } from "@clerk/nextjs";
+import { useAction } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useSignInModal } from "@/hooks/use-signin-modal";
+import { Button } from "./ui/button";
+import { toast } from "sonner";
+import { ConvexError } from "convex/values";
+import {
+  CREDIT_DEFAULT_VALUE,
+  CREDIT_MAX_LIMIT,
+  CREDIT_MIN_LIMIT,
+  PRICE_PER_CREDIT,
+} from "@/lib/api-limit";
 
-const CREDIT_MIN_LIMIT = 10;
-const CREDIT_MAX_LIMIT = 200;
-
-const DEFAULT_VALUE = 100;
+const NEXT_PUBLIC_REDIRECT_URL = process.env.NEXT_PUBLIC_REDIRECT_URL!;
 
 export const UpgradeModal = () => {
+  const { user } = useUser();
   const { isOpen, closeModal } = useUpgradeModal();
-  const [selectedCredits, setSelectedCredits] = useState(DEFAULT_VALUE); // Default to 10 credits
+  const { open: openSignInModal } = useSignInModal();
+  const [selectedCredits, setSelectedCredits] = useState(CREDIT_DEFAULT_VALUE);
 
-  const pricePerCredit = 0.1; // $0.10 per credit
-  const totalPrice = selectedCredits * pricePerCredit;
+  const [loading, setLoading] = useState(false);
 
-  const onUpgrade = () => {
-    // Handle credit purchase logic here
-    console.log(
-      `Purchased ${selectedCredits} credits for $${totalPrice.toFixed(2)}`
-    );
-    closeModal();
+  const createPayPalOrder = useAction(api.paymentAction.createPayPalOrder);
+  const totalPrice = selectedCredits * PRICE_PER_CREDIT;
+
+  const onCreateOrder = async () => {
+    if (!user) {
+      openSignInModal();
+      return;
+    }
+    setLoading(true);
+    try {
+      const paypalApprovalUrl = await createPayPalOrder({
+        amount: totalPrice,
+        userId: user.id,
+        credits: selectedCredits,
+        redirectUrl: NEXT_PUBLIC_REDIRECT_URL,
+      });
+      // Step 2: Redirect the user to PayPal for payment
+      window.location.href = paypalApprovalUrl;
+    } catch (error) {
+      console.log(error);
+      const errorMessage =
+        error instanceof ConvexError && error.data?.message
+          ? error.data.message
+          : "Failed to  create order.";
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -52,7 +84,6 @@ export const UpgradeModal = () => {
               task.
             </p>
           </div>
-
           {/* Credit Purchase Slider */}
           <div className="space-y-4">
             <div className="flex justify-between text-sm">
@@ -66,18 +97,23 @@ export const UpgradeModal = () => {
               max={CREDIT_MAX_LIMIT}
               step={10}
             />
-            {/* <div className="flex justify-between text-sm">
-              <span>Total Price</span>
-              <span>${totalPrice.toFixed(2)}</span>
-            </div> */}
           </div>
 
           {/* Buy Credits Button */}
           <Button
-            onClick={onUpgrade}
-            className="w-full bg-gradient-to-r from-primary to-purple-600 text-white hover:opacity-90"
+            onClick={onCreateOrder}
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-primary to-purple-600 text-white
+             disabled:opacity-50
+            "
           >
-            Buy {selectedCredits} Credits for ${totalPrice.toFixed(2)}
+            {loading ? (
+              <Loader className="w-4 h-4 animate-spin" />
+            ) : (
+              <>
+                Buy {selectedCredits} Credits for ${totalPrice.toFixed(2)}
+              </>
+            )}
           </Button>
         </div>
       </DialogContent>

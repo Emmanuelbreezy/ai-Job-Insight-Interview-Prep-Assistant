@@ -11,7 +11,7 @@ export const createJob = mutation({
     jobDescription: v.string(),
   },
   handler: async (ctx, args) => {
-    // 1. Handle API credits
+    //Handle API credits
     let apiLimits = await ctx.db
       .query("apiLimits")
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
@@ -21,7 +21,6 @@ export const createJob = mutation({
     if (!apiLimits) {
       const newLimitsId = await ctx.db.insert("apiLimits", {
         userId: args.userId,
-        plan: PLANS.FREE,
         credits: FREE_TIER_CREDITS,
         createdAt: Date.now(),
         updatedAt: Date.now(),
@@ -56,7 +55,6 @@ export const createJob = mutation({
       userId: args.userId,
       amount: CREDIT_COST.JOB_CREATION,
     });
-
     // 4. Initiate AI processing
     await ctx.scheduler.runAfter(0, internal.actions.processJobWithAI, {
       jobId,
@@ -127,30 +125,3 @@ export const getByJobId = query({
     return { data: [], success: false };
   },
 });
-
-// export const createJob = mutation({
-//   args: {
-//     userId: v.string(),
-//     jobDescription: v.string(),
-//   },
-//   handler: async (ctx, args) => {
-//     const jobId = await ctx.db.insert("jobs", {
-//       userId: args.userId,
-//       jobTitle: "Untitled",
-//       originalDescription: args.jobDescription,
-//       processedDescription: "",
-//       htmlFormatDescription: "",
-//       status: JobStatus.PROCESSING,
-//       createdAt: Date.now(),
-//       updatedAt: Date.now(),
-//     });
-//     // Call internal function to process with AI
-//     await ctx.scheduler.runAfter(0, internal.actions.processJobWithAI, {
-//       jobId,
-//       userId: args.userId,
-//       jobDescription: args.jobDescription,
-//     });
-
-//     return jobId;
-//   },
-// });

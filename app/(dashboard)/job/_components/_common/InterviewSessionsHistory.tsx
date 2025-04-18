@@ -12,7 +12,6 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Loader } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import FeedbackDialog from "./FeedbackDialog";
 
 const InterviewSessionsHistory = ({ jobId }: { jobId: Id<"jobs"> }) => {
@@ -72,31 +71,37 @@ const InterviewSessionsHistory = ({ jobId }: { jobId: Id<"jobs"> }) => {
                     </span>
                   </div>
                   <FeedbackDialog sessionId={session._id}>
-                    <Button
-                      variant="outline"
-                      className="absolute right-10"
-                      size="sm"
+                    <div
+                      className="absolute right-10 text-xs bg-white p-2 border
+                      rounded-sm"
                       onClick={(e) => {
                         e.stopPropagation(); // Prevent accordion from toggling
                       }}
                     >
                       View Feedback
-                    </Button>
+                    </div>
                   </FeedbackDialog>
                 </AccordionTrigger>
                 <AccordionContent className="p-4 space-y-4">
                   {session?.messages?.map((message, index) => (
                     <div key={index} className="relative pl-6">
-                      <div className="absolute left-2 top-0 h-full w-px bg-gray-200" />
                       <div
-                        className="absolute left-1 top-2 h-2 w-2 rounded-full border-2
+                        className="absolute left-2 top-0 h-full w-px
+                       bg-gray-200"
+                      />
+                      <div
+                        className="absolute left-1 top-2 h-2 w-2 
+                        rounded-full border-2
                      border-primary bg-primary"
                       />
                       <div className="space-y-2">
                         <p className="font-medium text-gray-700">
                           {message?.question?.text}
                         </p>
-                        <p className="w-full text-sm text-gray-500 line-clamp-2">
+                        <p
+                          className="w-full text-sm text-gray-500 
+                        line-clamp-2"
+                        >
                           {message?.answer?.text}
                         </p>
                       </div>

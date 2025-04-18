@@ -14,7 +14,6 @@ export const getUserCredits = query({
 
     return {
       credits: apiLimits?.credits ?? FREE_TIER_CREDITS,
-      plan: apiLimits?.plan ?? PLANS.FREE,
     };
   },
 });
@@ -40,5 +39,29 @@ export const deductCredit = mutation({
       credits: newCredits,
       updatedAt: Date.now(),
     });
+  },
+});
+
+export const addCredits = mutation({
+  args: {
+    userId: v.string(),
+    credits: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const userLimits = await ctx.db
+      .query("apiLimits")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .unique();
+    if (!userLimits) {
+      throw new ConvexError("User not found");
+    }
+    const newCredits = parseFloat(
+      (userLimits.credits + args.credits).toFixed(2)
+    );
+    await ctx.db.patch(userLimits._id, {
+      credits: newCredits,
+    });
+
+    return { success: true };
   },
 });

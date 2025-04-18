@@ -3,8 +3,10 @@ export const PLANS = {
   PRO: "PRO",
 } as const;
 
+export const PRICE_PER_CREDIT = 0.1;
 export const CREDIT_MIN_LIMIT = 10;
-export const CREDIT_MAX_LIMIT = 200;
+export const CREDIT_MAX_LIMIT = 300;
+export const CREDIT_DEFAULT_VALUE = 100;
 
 export const CREDIT_COST = {
   JOB_CREATION: 1, // Processing job description
@@ -14,7 +16,7 @@ export const CREDIT_COST = {
   INTERVIEW_FEEDBACK: 3, // Final comprehensive feedback
 } as const;
 
-export const FREE_TIER_CREDITS = 5;
+export const FREE_TIER_CREDITS = 10.0;
 
 // Recommendation
 // Option 1 (Lower Cost Per Question): Best if users frequently stop sessions early.

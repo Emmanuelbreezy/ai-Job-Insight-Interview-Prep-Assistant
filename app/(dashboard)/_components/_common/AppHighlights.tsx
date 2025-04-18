@@ -23,7 +23,7 @@ const AppHighlights = () => {
           {/* Text Content */}
           <div className="text-center">
             <h3 className="text-xs text-[#374356] leading-[14px]">
-              #1 Resume to Portfolio AI
+              #1 Job Assistant AI
             </h3>
             <div className="text-base font-bold text-[#070D1B] leading-7">
               Original
@@ -116,10 +116,10 @@ const AppHighlights = () => {
           {/* Text Content */}
           <div className="text-center">
             <h3 className="text-xs text-[#374356] leading-[14px]">
-              Fast & Efficient
+              Ace Your Interview
             </h3>
             <div className="text-base font-bold text-[#070D1B] leading-7">
-              Portfolios in Mins
+              Practice in Mins
             </div>
           </div>
 
