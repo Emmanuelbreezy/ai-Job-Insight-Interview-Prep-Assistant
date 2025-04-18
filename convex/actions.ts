@@ -5,7 +5,6 @@ import { processAndCleanJobDescription } from "@/lib/job-processor";
 import { getJobTitleDescPrompt } from "@/lib/prompt";
 import { api } from "./_generated/api";
 import { JobInsightStatus, JobStatus, Role } from "@/lib/constant";
-import { storeInVectorDB } from "@/lib/pinecone-vectordb";
 import { genAI } from "@/lib/gemini-ai";
 
 export const processJobWithAI = internalAction({
@@ -51,19 +50,8 @@ export const processJobWithAI = internalAction({
       status: JobStatus.READY,
     });
 
-    // // Store the processed description in the vector database
-    await storeInVectorDB(args.jobId, [
-      {
-        content: `${title}: ${processedDesc}`,
-        metadata: {
-          jobId: args.jobId,
-          userId: args.userId,
-          title: title,
-        },
-      },
-    ]);
     // Send welcome message
-    await ctx.runMutation(api.jobInsightConversation.create, {
+    await ctx.scheduler.runAfter(0, api.jobInsightConversation.create, {
       userId: args.userId,
       jobId: args.jobId,
       text: welcomeMessage(title),
