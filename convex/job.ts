@@ -3,7 +3,7 @@ import { mutation, query } from "./_generated/server";
 import { AppMode, JobStatus } from "@/lib/constant";
 import { api, internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
-import { CREDIT_COST, FREE_TIER_CREDITS, PLANS } from "@/lib/api-limit";
+import { CREDIT_COST, FREE_TIER_CREDITS } from "@/lib/api-limit";
 
 export const createJob = mutation({
   args: {

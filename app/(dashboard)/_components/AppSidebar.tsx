@@ -18,7 +18,7 @@ import { useUpgradeModal } from "@/hooks/use-upgrade-modal";
 import JobSidebarList from "./JobSidebarList";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { FREE_TIER_CREDITS, PLANS } from "@/lib/api-limit";
+import { FREE_TIER_CREDITS } from "@/lib/api-limit";
 
 const AppSidebar = () => {
   const { isSignedIn, user, isLoaded } = useUser();

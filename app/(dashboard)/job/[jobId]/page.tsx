@@ -1,22 +1,9 @@
 import React from "react";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import ChatView from "../_components/ChatLeftPanel";
-import JobView from "../_components/RightSidePanel";
 import { JobResizablePanel } from "../_components/JobResizablePanel";
 
-const Page = async ({
-  params,
-}: {
-  params: {
-    jobId: string;
-  };
-}) => {
-  const { jobId } = params;
-
+async function Page({ params }: any) {
+  const { jobId } = await params;
+  console.log(params);
   return (
     <div
       className="flex-1 bg-white justify-between flex 
@@ -28,6 +15,6 @@ const Page = async ({
       </div>
     </div>
   );
-};
+}
 
 export default Page;
