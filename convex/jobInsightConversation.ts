@@ -219,10 +219,10 @@ export const generateAIJobInsightResponse = internalAction({
 
 export const getJob = query({
   args: {
-    jobId: v.id("jobs"),
+    jobId: v.string(),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.jobId);
+    return await ctx.db.get(args.jobId as Id<"jobs">);
   },
 });
 

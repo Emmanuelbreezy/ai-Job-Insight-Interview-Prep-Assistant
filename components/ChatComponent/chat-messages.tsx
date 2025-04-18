@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { useUpgradeModal } from "@/hooks/use-upgrade-modal";
 
 const ChatMessages = (props: {
-  jobId: Id<"jobs">;
+  jobId: string;
   userId: string | null;
   userName: string | null;
   data: any;

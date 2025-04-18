@@ -10,7 +10,7 @@ import { useAppContext } from "@/context/AppProvider";
 import { AppMode, InterviewStatus } from "@/lib/constant";
 
 const ChatComponent = (props: {
-  jobId: Id<"jobs">;
+  jobId: string;
   userId: string | null;
   userName: string | null;
 }) => {

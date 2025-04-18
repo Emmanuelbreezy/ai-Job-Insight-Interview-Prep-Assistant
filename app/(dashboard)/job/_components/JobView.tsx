@@ -6,7 +6,7 @@ import { AppMode } from "@/lib/constant";
 import InterviewSessionsHistory from "./_common/InterviewSessionsHistory";
 import JobDetails from "./_common/JobDetails";
 
-const JobView = (props: { jobId: Id<"jobs"> }) => {
+const JobView = (props: { jobId: string }) => {
   const { jobMode } = useAppContext();
   return (
     <div className="flex w-full h-screen overflow-y-auto ">

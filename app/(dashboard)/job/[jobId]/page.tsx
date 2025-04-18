@@ -5,19 +5,15 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import ChatView from "../_components/ChatView";
-import { Id } from "@/convex/_generated/dataModel";
-import { AppMode } from "@/lib/constant";
-import JobDetails from "../_components/_common/JobDetails";
-import InterviewSessionsHistory from "../_components/_common/InterviewSessionsHistory";
 import JobView from "../_components/JobView";
 
-interface PageProps {
+const Page = async ({
+  params,
+}: {
   params: {
-    jobId: Id<"jobs">;
+    jobId: string;
   };
-}
-
-const Page = async ({ params }: PageProps) => {
+}) => {
   const { jobId } = await params;
 
   return (
@@ -29,12 +25,7 @@ const Page = async ({ params }: PageProps) => {
       <div className="mx-auto w-full max-w-8xl grow lg:flex">
         <ResizablePanelGroup direction="horizontal" className="w-full h-full">
           {/* Right Panel*/}
-          <ResizablePanel
-            defaultSize={55}
-            className=""
-            collapsible
-            collapsedSize={0}
-          >
+          <ResizablePanel defaultSize={55} collapsible collapsedSize={0}>
             <ChatView jobId={jobId} />
           </ResizablePanel>
 

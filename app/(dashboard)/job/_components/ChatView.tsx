@@ -2,12 +2,11 @@
 import React from "react";
 import ChatComponent from "@/components/ChatComponent";
 import { useUser } from "@clerk/nextjs";
-import { Id } from "@/convex/_generated/dataModel";
 import { useAppContext } from "@/context/AppProvider";
 import { AppMode } from "@/lib/constant";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 
-const ChatView = (props: { jobId: Id<"jobs"> }) => {
+const ChatView = (props: { jobId: string }) => {
   const { user } = useUser();
   const { jobMode } = useAppContext();
   const { open, isMobile } = useSidebar();

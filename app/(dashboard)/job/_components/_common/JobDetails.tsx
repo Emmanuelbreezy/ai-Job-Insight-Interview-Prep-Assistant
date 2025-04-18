@@ -4,7 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Loader } from "lucide-react";
 
-const JobDetails = ({ jobId }: { jobId: Id<"jobs"> }) => {
+const JobDetails = ({ jobId }: { jobId: string }) => {
   const job = useQuery(api.jobInsightConversation.getJob, { jobId });
 
   if (job === undefined) {

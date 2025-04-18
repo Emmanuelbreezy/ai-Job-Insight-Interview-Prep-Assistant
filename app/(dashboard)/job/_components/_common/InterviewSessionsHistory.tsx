@@ -14,7 +14,7 @@ import { api } from "@/convex/_generated/api";
 import { Loader } from "lucide-react";
 import FeedbackDialog from "./FeedbackDialog";
 
-const InterviewSessionsHistory = ({ jobId }: { jobId: Id<"jobs"> }) => {
+const InterviewSessionsHistory = ({ jobId }: { jobId: string }) => {
   const [expandedSession, setExpandedSession] = useState<string | null>(null);
 
   const data = useQuery(api.interviewSession.getInterviewSessionsByJobId, {

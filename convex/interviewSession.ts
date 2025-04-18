@@ -18,10 +18,10 @@ import { CREDIT_COST } from "@/lib/api-limit";
 export const createInterviewSession = mutation({
   args: {
     userId: v.string(),
-    jobId: v.id("jobs"),
+    jobId: v.string(),
   },
   handler: async (ctx, args) => {
-    const job = await ctx.db.get(args.jobId);
+    const job = await ctx.db.get(args.jobId as Id<"jobs">);
     if (!job) throw new ConvexError({ message: "Job not found" });
     const apiLimits = await ctx.db
       .query("apiLimits")
@@ -47,7 +47,7 @@ export const createInterviewSession = mutation({
 
     const sessionId = await ctx.db.insert("interviewSessions", {
       userId: args.userId,
-      jobId: args.jobId,
+      jobId: job._id,
       status: InterviewStatus.STARTED,
       currentQuestionIndex: 0,
       totalQuestions: 10,
@@ -295,13 +295,13 @@ export const getMessagesBySessionId = query({
 });
 
 export const getInterviewSessionsByJobId = query({
-  args: { jobId: v.id("jobs") },
+  args: { jobId: v.string() },
   handler: async (ctx, args) => {
     if (!args.jobId) throw new ConvexError({ message: "JobId not found" });
     // Fetch all sessions for the given jobId
     const sessions = await ctx.db
       .query("interviewSessions")
-      .withIndex("by_job", (q) => q.eq("jobId", args.jobId))
+      .withIndex("by_job", (q) => q.eq("jobId", args.jobId as Id<"jobs">))
       .order("desc")
       .collect();
 
