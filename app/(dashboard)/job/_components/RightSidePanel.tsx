@@ -1,12 +1,11 @@
 "use client";
 import React from "react";
-import { Id } from "@/convex/_generated/dataModel";
 import { useAppContext } from "@/context/AppProvider";
 import { AppMode } from "@/lib/constant";
 import InterviewSessionsHistory from "./_common/InterviewSessionsHistory";
 import JobDetails from "./_common/JobDetails";
 
-const JobView = (props: { jobId: string }) => {
+const RightSidePanel = (props: { jobId: string }) => {
   const { jobMode } = useAppContext();
   return (
     <div className="flex w-full h-screen overflow-y-auto ">
@@ -21,4 +20,4 @@ const JobView = (props: { jobId: string }) => {
   );
 };
 
-export default JobView;
+export default RightSidePanel;
