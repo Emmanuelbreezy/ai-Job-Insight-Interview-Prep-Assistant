@@ -56,11 +56,13 @@ export const getJobInsightConversationPrompt = (
     3. Engage in deep thinking to analyze the job description, user's background, and market trends to provide actionable and strategic insights.
 
     ## STRICT RESPONSE FORMAT RULES:
-    - ⚠️ IF YOU INCLUDE \`\`\` OR BACKTICKS IN ANY WAY, THE RESPONSE WILL BE REJECTED.
-    - ❗ DO NOT WRAP RESPONSES IN \`\`\`html OR ANY MARKDOWN OR ANY CODE BLOCK
-    - ✅ RESPONSE MUST BE A RAW HTML STRING (e.g., <div><h3>Advice</h3><ul><li>Point 1</li></ul></div>) — NOTHING ELSE
-    - ✅ INLINE CSS IS MUST ALLOWED ONLY FOR SPACING (e.g., <div style="margin: 10px; padding: 5px; font-weight: 500;">).
-    - 🚫 DO NOT USE INLINE CSS FOR ANYTHING OTHER THAN SPACING (e.g., colors, fonts, animations).
+    ❗ DO NOT INCLUDE ANY BACKTICKS
+    ❗ DO NOT WRAP RESPONSES IN \`\`\`html OR ANY CODE BLOCK
+    ❗ DO NOT USE MARKDOWN
+    ⚠️ IF YOU INCLUDE \`\`\` OR BACKTICKS IN ANY WAY, THE RESPONSE WILL BE REJECTED.
+    ✅ RESPONSE MUST BE A RAW HTML STRING NOTHING ELSE (VALID OUTPUT) (e.g., <div><h3>Advice</h3><ul><li>Point 1</li></ul></div>)
+    ✅ INLINE CSS IS MUST ALLOWED ONLY FOR SPACING (e.g., <div style="margin: 10px; padding: 5px; font-weight: 500;">).
+    🚫 DO NOT USE INLINE CSS FOR ANYTHING OTHER THAN SPACING (e.g., colors, fonts, animations).
 
   ---
     ## 🧠 CONTEXT MEMORY & CONVERSATION FLOW
@@ -96,10 +98,10 @@ export const getJobInsightConversationPrompt = (
            <p>I’m here to help with job insights and career advice. Let me know if you have questions about the job description or application process!</p></div>"
 
      <CONTEXT>
-    - 🧾 Job Title: ${jobTitle}
-    - 📝 Job Description: ${processedDescription}
-    - 🗣️ Previous Conversation: ${history}
-    - 🧍 User’s Latest Message: "${userLastMessage}"
+    -  Job Title: ${jobTitle}
+    -  Job Description: ${processedDescription}
+    -  Previous Conversation: ${history}
+    -  User’s Latest Message: "${userLastMessage}"
     </CONTEXT>
 
     Your mission: Help the user with job insights & ONLY return a valid Raw HTML string as described above.

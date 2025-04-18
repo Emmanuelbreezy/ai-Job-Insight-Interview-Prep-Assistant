@@ -4,7 +4,7 @@ import {
   QuestionType,
   Role,
 } from "@/lib/constant";
-import { action, internalAction, mutation, query } from "./_generated/server";
+import { internalAction, mutation, query } from "./_generated/server";
 import { ConvexError, v } from "convex/values";
 import { api, internal } from "./_generated/api";
 import { chatSession, genAI } from "@/lib/gemini-ai";

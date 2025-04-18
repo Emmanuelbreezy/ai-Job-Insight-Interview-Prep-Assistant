@@ -1,12 +1,12 @@
 "use node";
 import { v } from "convex/values";
 import { internalAction } from "./_generated/server";
-import { genAI } from "@/lib/gemini-ai";
 import { processAndCleanJobDescription } from "@/lib/job-processor";
 import { getJobTitleDescPrompt } from "@/lib/prompt";
 import { api } from "./_generated/api";
 import { JobInsightStatus, JobStatus, Role } from "@/lib/constant";
 import { storeInVectorDB } from "@/lib/pinecone-vectordb";
+import { genAI } from "@/lib/gemini-ai";
 
 export const processJobWithAI = internalAction({
   args: {
