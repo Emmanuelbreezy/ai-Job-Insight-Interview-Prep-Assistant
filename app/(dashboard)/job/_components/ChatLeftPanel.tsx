@@ -6,7 +6,7 @@ import { useAppContext } from "@/context/AppProvider";
 import { AppMode } from "@/lib/constant";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 
-const ChatView = (props: { jobId: string }) => {
+const ChatLeftPanel = (props: { jobId: string }) => {
   const { user } = useUser();
   const { jobMode } = useAppContext();
   const { open, isMobile } = useSidebar();
@@ -23,7 +23,7 @@ const ChatView = (props: { jobId: string }) => {
       >
         <div className="flex items-center gap-2">
           {(!open || isMobile) && <SidebarTrigger />}
-          <h1 className="font-semibold">
+          <h1 className="font-semibold pt-1">
             {jobMode === AppMode.JOB_INSIGHT
               ? "Job Insight Mode"
               : "Interview Session"}
@@ -41,4 +41,4 @@ const ChatView = (props: { jobId: string }) => {
   );
 };
 
-export default ChatView;
+export default ChatLeftPanel;

@@ -4,8 +4,9 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import ChatView from "../_components/ChatView";
-import JobView from "../_components/JobView";
+import ChatView from "../_components/ChatLeftPanel";
+import JobView from "../_components/RightSidePanel";
+import { JobResizablePanel } from "../_components/JobResizablePanel";
 
 const Page = async ({
   params,
@@ -14,7 +15,7 @@ const Page = async ({
     jobId: string;
   };
 }) => {
-  const { jobId } = await params;
+  const { jobId } = params;
 
   return (
     <div
@@ -23,24 +24,7 @@ const Page = async ({
     overflow-hidden"
     >
       <div className="mx-auto w-full max-w-8xl grow lg:flex">
-        <ResizablePanelGroup direction="horizontal" className="w-full h-full">
-          {/* Right Panel*/}
-          <ResizablePanel defaultSize={55} collapsible collapsedSize={0}>
-            <ChatView jobId={jobId} />
-          </ResizablePanel>
-
-          {/* Resizable Handle */}
-          <ResizableHandle withHandle />
-
-          <ResizablePanel
-            defaultSize={45}
-            className="pt-2 border-l border-gray-200"
-            collapsible
-            collapsedSize={0}
-          >
-            <JobView jobId={jobId} />
-          </ResizablePanel>
-        </ResizablePanelGroup>
+        <JobResizablePanel jobId={jobId} />
       </div>
     </div>
   );

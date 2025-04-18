@@ -90,25 +90,22 @@ const ChatInput = ({
   };
 
   return (
-    <div className="sticky bottom-0 left-0 w-full">
+    <div className="sticky bottom-0 left-0 w-full bg-white">
       <div
-        className="mx-2 flex flex-row gap-3 md:mx-4 md:last:mb-6 
-      lg:mx-auto lg:max-w-2xl xl:max-w-3xl bg-white"
+        className="flex flex-row gap-3 mx-2 md:mx-4 md:last:mb-6 
+      lg:mx-auto lg:max-w-2xl xl:max-w-3xl"
       >
         <div
-          className="relative flex h-full flex-1 items-stretch 
-        md:flex-col px-4 pt-3 -mb-3 w-full"
+          className="relative flex flex-col h-full flex-1 
+        px-4 pt-3 mb-3 lg:-mb-3 w-full"
         >
           {/* Suggested Prompts */}
           {jobMode === AppMode.JOB_INSIGHT && (
             <JobInsightPrompts isDisabled={isDisabled} onSubmit={handleInput} />
           )}
           <div
-            className="relative flex flex-col w-full flex-grow
-        border-zinc-300 mx-2 md:mx-0 items-stretch transition-all
-          border-[0.5px] 
-        duration-200 shadow-md 
-         hover:border-border-200
+            className="relative flex flex-col w-full border-zinc-300
+        border-[0.5px] shadow-md hover:border-border-200
          rounded-2xl p-3 !bg-[rgba(243,244,246,.3)]
           "
           >
