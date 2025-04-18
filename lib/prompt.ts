@@ -124,13 +124,13 @@ export const getInterviewQuestionPrompt = (
     4. **Clarity**: The question must be clear and easy to understand.
     5. **Field-Specific**: The question must align with the skills, tools, or responsibilities of the job.
 
-    ## 🎉 STRICT RESPONSE FORMAT RULES:
+    ## STRICT RESPONSE FORMAT RULES:
     - THE QUESTION MUST ALWAYS BE 1-2 LINES LONG.
     - RETURN ONLY ONE QUESTION OBJECT AS A JSON STRING.
     - THE QUESTION MUST BE DIRECTLY RELATED TO THE JOB DESCRIPTION.
     - THE QUESTION MUST BE UNIQUE AND NOT REPEAT PREVIOUS QUESTIONS.
 
-    ## 📝 JOB DESCRIPTION
+    ## JOB DESCRIPTION
     <CONTEXT>
     ${processedJobDescription}
     <CONTEXT>
@@ -139,7 +139,7 @@ export const getInterviewQuestionPrompt = (
     1. TYPE: Choose the MOST relevant question type in the following order:
        - ORAL: Conversational questions that meet real-world questions.
        - SCENARIO: Real-world situational tests.
-    2. 🧠 CONTEXT MEMORY & CONVERSATION FLOW:
+    2. CONTEXT MEMORY & CONVERSATION FLOW:
        - Last question: ${lastQuestion || "None"}
        - The Job description: "${processedJobDescription}"
        - Must demonstrate logical progression.
@@ -156,12 +156,12 @@ export const getInterviewQuestionPrompt = (
 
     ## 📦 OUTPUT FORMAT (STRICT JSON)
     {
-      "question": "Precisely framed question with a fun and engaging tone! 😊",
+      "question": "Precisely framed question with a fun and engaging tone!",
       "type": "${Object.values(QuestionType).join("|")}",
     }
 
     ## YOUR MISSION
-    Generate a lively, fun, and engaging interview question that makes the candidate feel excited and confident! 🎉
+    Generate a lively and engaging interview question that makes the candidate feel excited and confident! 🎉
   `;
 };
 

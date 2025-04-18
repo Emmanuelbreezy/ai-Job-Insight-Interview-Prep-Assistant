@@ -438,11 +438,14 @@ export const getInterviewFeedback = query({
         q.eq("sessionId", args.sessionId as Id<"interviewSessions">)
       )
       .collect();
+
     const totalScore = feedbackList.reduce(
       (acc, feedback) => acc + feedback.score,
       0
     );
-    const totalPercentage = (totalScore / (feedbackList.length * 100)) * 100;
+    const totalPossibleScore = feedbackList.length * 10; // Each question is out of 10
+    const totalPercentage = (totalScore / totalPossibleScore) * 100;
+
     return {
       feedbackList,
       totalScore,

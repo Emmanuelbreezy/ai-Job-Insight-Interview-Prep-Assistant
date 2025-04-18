@@ -50,7 +50,7 @@ const FeedbackDialog = ({ sessionId, children }: FeedbackDialogProps) => {
           {feedbackData && (
             <div className="mt-3 space-y-1">
               <p className="text-sm font-medium text-gray-700">
-                Total Score: {feedbackData.totalScore} / 100
+                Overall Score: {feedbackData.totalPercentage}%
               </p>
               <Progress
                 value={feedbackData.totalPercentage}
