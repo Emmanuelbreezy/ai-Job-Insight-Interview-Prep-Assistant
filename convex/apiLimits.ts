@@ -1,6 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { FREE_TIER_CREDITS, PLANS } from "@/lib/api-limit";
+import { FREE_TIER_CREDITS } from "@/lib/api-limit";
 
 export const getUserCredits = query({
   args: {
