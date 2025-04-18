@@ -81,7 +81,7 @@ const FeedbackDialog = ({ sessionId, children }: FeedbackDialogProps) => {
                     </Badge>
                   </div>
 
-                  <Progress value={fb.score} className="h-2 mb-3" />
+                  <Progress value={fb.score * 10} className="h-2 mb-3" />
 
                   <div className="text-sm space-y-1 text-gray-700">
                     <p>
